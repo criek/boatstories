@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MV Stellarfjord — North Sea Transit Log</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #080c10;
+    --panel:     #0b1018;
+    --border:    #1a2a3a;
+    --border-hi: #1e3a52;
+    --text:      #8ba8be;
+    --text-dim:  #3a5268;
+    --text-hi:   #c8dce8;
+    --cyan:      #00d4ff;
+    --cyan-dim:  rgba(0,212,255,0.12);
+    --amber:     #f5a623;
+    --amber-dim: rgba(245,166,35,0.15);
+    --red:       #ff3b3b;
+    --red-dim:   rgba(255,59,59,0.13);
+    --green:     #00e87a;
+    --green-dim: rgba(0,232,122,0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* scanlines */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px, transparent 3px,
+      rgba(0,0,0,0.055) 3px, rgba(0,0,0,0.055) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 20px;
+    height: 40px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    z-index: 500;
+  }
+
+  .hdr-sys {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--cyan);
+    letter-spacing: 0.18em;
+    opacity: 0.65;
+  }
+
+  .hdr-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-hi);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .hdr-fill { flex: 1; }
+
+  .hdr-hint {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.56rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+
+  .live-pill {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--green);
+    border: 1px solid var(--green);
+    padding: 2px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.1em;
+    animation: liveblink 2.6s ease-in-out infinite;
+  }
+
+  @keyframes liveblink { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+  /* ── LAYOUT ── */
+  .layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── REPORT ── */
+  .report-panel {
+    width: 40%;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .panel-bar {
+    padding: 8px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .panel-bar-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--text-dim);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .panel-bar-nodes {
+    margin-left: auto;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--cyan);
+    opacity: 0.5;
+    letter-spacing: 0.1em;
+  }
+
+  .scroll-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 20px 36px;
+  }
+
+  .scroll-body::-webkit-scrollbar { width: 3px; }
+  .scroll-body::-webkit-scrollbar-track { background: transparent; }
+  .scroll-body::-webkit-scrollbar-thumb { background: var(--border-hi); }
+
+  .sec {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.56rem;
+    letter-spacing: 0.2em;
+    color: var(--cyan);
+    opacity: 0.5;
+    text-transform: uppercase;
+    margin-top: 22px;
+    margin-bottom: 9px;
+  }
+  .sec:first-child { margin-top: 0; }
+
+  .scroll-body p {
+    font-size: 0.9rem;
+    font-weight: 400;
+    line-height: 1.78;
+    color: var(--text);
+    margin-bottom: 12px;
+    letter-spacing: 0.01em;
+  }
+
+  /* ── KEYWORDS ── */
+  .kw {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    color: var(--text-hi);
+    background: rgba(26,42,58,0.7);
+    border: 1px solid var(--border-hi);
+    border-radius: 2px;
+    padding: 1px 7px 1px 5px;
+    cursor: pointer;
+    transition: background 0.14s, border-color 0.14s, color 0.14s, box-shadow 0.14s;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  .kw-ico { width: 12px; height: 12px; flex-shrink: 0; opacity: 0.55; transition: opacity 0.14s; }
+
+  /* per-status hover/active */
+  .kw.s-red:hover    { border-color:var(--red);   color:var(--red);   background:var(--red-dim);   box-shadow:0 0 10px rgba(255,59,59,0.25); }
+  .kw.s-amber:hover  { border-color:var(--amber); color:var(--amber); background:var(--amber-dim); box-shadow:0 0 10px rgba(245,166,35,0.25); }
+  .kw.s-green:hover  { border-color:var(--green); color:var(--green); background:var(--green-dim); box-shadow:0 0 10px rgba(0,232,122,0.2); }
+
+  .kw.s-red.active   { border-color:var(--red);   color:var(--red);   background:var(--red-dim);   box-shadow:0 0 14px rgba(255,59,59,0.4); }
+  .kw.s-amber.active { border-color:var(--amber); color:var(--amber); background:var(--amber-dim); box-shadow:0 0 14px rgba(245,166,35,0.4); }
+  .kw.s-green.active { border-color:var(--green); color:var(--green); background:var(--green-dim); box-shadow:0 0 14px rgba(0,232,122,0.35); }
+
+  .kw:hover .kw-ico, .kw.active .kw-ico { opacity: 1; }
+
+  /* ── LEGEND ── */
+  .legend {
+    margin-top: 24px;
+    border: 1px solid var(--border);
+    border-left: 2px solid rgba(0,212,255,0.35);
+    background: rgba(0,212,255,0.025);
+    padding: 12px 14px;
+  }
+
+  .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+
+  /* ── MAP ── */
+  .map-panel { flex: 1; position: relative; overflow: hidden; }
+  #map { width: 100%; height: 100%; }
+
+  /* ── SITE MARKERS ── */
+  .site-icon {
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px;
+    border-radius: 3px;
+    border: 1.5px solid currentColor;
+    background: #080c10;
+    cursor: pointer;
+    transition: transform 0.18s, box-shadow 0.18s, background 0.18s;
+  }
+
+  .site-icon.c-red   { color: var(--red);   box-shadow: 0 0 8px rgba(255,59,59,0.35); }
+  .site-icon.c-amber { color: var(--amber);  box-shadow: 0 0 8px rgba(245,166,35,0.3); }
+  .site-icon.c-green { color: var(--green);  box-shadow: 0 0 8px rgba(0,232,122,0.25); }
+
+  .site-icon.active.c-red   { background: var(--red-dim);   box-shadow: 0 0 0 3px rgba(255,59,59,0.35), 0 0 22px rgba(255,59,59,0.5); transform: scale(1.22); }
+  .site-icon.active.c-amber { background: var(--amber-dim); box-shadow: 0 0 0 3px rgba(245,166,35,0.35), 0 0 22px rgba(245,166,35,0.5); transform: scale(1.22); }
+  .site-icon.active.c-green { background: var(--green-dim); box-shadow: 0 0 0 3px rgba(0,232,122,0.35), 0 0 22px rgba(0,232,122,0.4); transform: scale(1.22); }
+
+  /* ── POPUP ── */
+  .leaflet-popup-content-wrapper {
+    background: #0b1018;
+    border: 1px solid var(--border-hi);
+    border-radius: 3px;
+    box-shadow: 0 6px 28px rgba(0,0,0,0.8);
+    font-family: 'Rajdhani', sans-serif;
+  }
+  .leaflet-popup-tip-container { display: none; }
+  .leaflet-popup-close-button  { display: none; }
+  .leaflet-popup-content { margin: 12px 15px; }
+  .pu-status { font-family:'Share Tech Mono',monospace; font-size:0.56rem; letter-spacing:0.18em; margin-bottom:3px; }
+  .pu-name   { font-size:0.92rem; font-weight:600; color:var(--text-hi); letter-spacing:0.04em; margin-bottom:4px; }
+  .pu-desc   { font-size:0.78rem; color:var(--text); line-height:1.5; max-width:195px; }
+
+  .leaflet-control-attribution {
+    background: rgba(8,12,16,0.8) !important;
+    color: var(--text-dim) !important;
+    font-family: 'Share Tech Mono', monospace !important;
+    font-size: 0.5rem !important;
+    letter-spacing: 0.04em;
+    border: none !important;
+  }
+  .leaflet-control-attribution a { color: #3a5268 !important; }
+
+  .line-tooltip {
+    background: rgba(8,12,16,0.88);
+    border: 1px solid var(--border-hi);
+    border-radius: 2px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    box-shadow: none;
+    white-space: nowrap;
+  }
+  .line-tooltip::before { display: none; }
+
+  /* ── CONNECTOR SVG ── */
+  #conn-svg {
+    position: fixed; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 8000;
+  }
+
+  #conn-path {
+    fill: none;
+    stroke-width: 1.5;
+    stroke-dasharray: 5 4;
+    opacity: 0;
+    transition: opacity 0.22s;
+  }
+  #conn-path.vis { opacity: 0.9; animation: dash 0.9s linear infinite; }
+  @keyframes dash { to { stroke-dashoffset: -18; } }
+
+  .cn { opacity: 0; transition: opacity 0.22s; }
+  .cn.vis { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="hdr-sys">SYS://</span>
+  <span class="hdr-title">MV Stellarfjord — North Sea Transit Log</span>
+  <div class="hdr-fill"></div>
+  <span class="hdr-hint">SELECT KEYWORD OR MARKER TO LINK</span>
+  <div style="width:14px"></div>
+  <span class="live-pill">● LIVE</span>
+</header>
+
+<div class="layout">
+
+  <!-- REPORT PANEL -->
+  <div class="report-panel">
+    <div class="panel-bar">
+      <span class="panel-bar-label">Voyage Report · REF-NS-2024-0441</span>
+      <span class="panel-bar-nodes">[ 4 EVENTS ]</span>
+    </div>
+
+    <div class="scroll-body">
+
+      <div class="sec">// voyage summary</div>
+      <p>MV Stellarfjord departed Immingham on 14 Nov 2024, bound for Bergen via the central North Sea corridor. The vessel tracked north-northwest across the Dogger Bank before turning onto a northerly heading through the Norwegian Trench. Transit duration: 61 hours. Four subsea cable crossings were logged en route.</p>
+
+      <div class="sec">// cable crossing events</div>
+
+      <p>At 0312 UTC, [nemo-crossing] was recorded at 54.8°N as the vessel passed over the NEMO interconnector linking the UK and Belgium. Crossing speed was reduced to 6 knots per standing cable protection orders. No anomalies recorded.</p>
+
+      <p>By mid-morning, [nord-link-approach] brought the vessel over the NordLink HVDC cable running between Norway and Germany. The crossing occurred in deteriorating weather — wind force 7, 3.5m swell — and was logged as routine. Cable protection zone observed without incident.</p>
+
+      <p>The most operationally complex crossing was [viking-link-transit], where the vessel tracked parallel to the Viking Link corridor for approximately 14 nautical miles before the designated crossing point. Proximity to the cable route triggered an automatic AIS alert. Bridge watch was doubled and anchor was secured for the duration.</p>
+
+      <p>[norwegian-trench-entry] marks the vessel's descent into the Norwegian Trench, crossing a cluster of Norwegian Petroleum Directorate-registered pipeline routes. Depth increases sharply to over 700m. Reduced speed maintained until clear of the restricted zone.</p>
+
+      <div class="sec">// master's remarks</div>
+      <p>All four crossing events — [nemo-crossing], [nord-link-approach], [viking-link-transit], and [norwegian-trench-entry] — were completed in accordance with applicable cable protection protocols. No emergency procedures were required. Vessel arrived Bergen 16 Nov 2024 at 1634 UTC.</p>
+
+      <div class="legend">
+        <div class="sec" style="margin-top:0">// status codes</div>
+        <div class="legend-row">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#ff3b3b" stroke-width="1.9" stroke-linejoin="round"><path d="M8 2.5L13.5 13H2.5L8 2.5z"/><line x1="8" y1="7" x2="8" y2="10"/><circle cx="8" cy="11.8" r="0.65" fill="#ff3b3b" stroke="none"/></svg>
+          ALERT — cable protection zone active
+        </div>
+        <div class="legend-row">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#f5a623" stroke-width="1.9"><circle cx="8" cy="8" r="5.5"/><line x1="8" y1="6" x2="8" y2="9.2"/><circle cx="8" cy="11" r="0.65" fill="#f5a623" stroke="none"/></svg>
+          CAUTION — reduced speed required
+        </div>
+        <div class="legend-row" style="margin-bottom:0">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#00e87a" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="5.5"/><polyline points="5.2,8.2 7.3,10.4 11.2,5.8"/></svg>
+          LOGGED — crossing complete, no incident
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MAP PANEL -->
+  <div class="map-panel">
+    <div id="map"></div>
+  </div>
+
+</div>
+
+<!-- Connector SVG overlay -->
+<svg id="conn-svg" xmlns="http://www.w3.org/2000/svg">
+  <path id="conn-path"/>
+  <circle id="cn-a"  class="cn" r="4"/>
+  <circle id="cn-b"  class="cn" r="4"/>
+  <circle id="cn-a2" class="cn" r="8"  fill="none" stroke-width="1"/>
+  <circle id="cn-b2" class="cn" r="8"  fill="none" stroke-width="1"/>
+</svg>
+
+<script>
+// ── GEOJSON SOURCE ────────────────────────────────────────────────────────────
+// Edit this string to change sites and lines. Points need: id, name, status
+// (priority|moderate|nominal), icon (warn|info|check), desc.
+// LineStrings are rendered as styled overlays; add a 'label' property to annotate.
+const GEOJSON_SRC = `{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "LineString", "coordinates": [
+        [  -0.18, 53.64], [  0.42, 54.10], [  1.20, 54.82],
+        [  2.05, 55.60], [  2.80, 56.40], [  3.30, 57.20],
+        [  3.90, 57.90], [  4.60, 58.80], [  4.90, 59.50],
+        [  5.20, 60.39]
+      ] },
+      "properties": { "label": "MV Stellarfjord track", "status": "nominal" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [1.20, 54.82] },
+      "properties": {
+        "id": "nemo-crossing", "name": "NEMO Crossing",
+        "status": "nominal", "icon": "check",
+        "desc": "NEMO interconnector (UK–Belgium, 1000MW HVDC). Crossed at 6 kts, 0312 UTC. No anomalies."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "LineString", "coordinates": [
+        [-1.50, 54.20], [0.00, 54.60], [1.50, 54.92], [3.20, 55.10], [5.00, 54.90]
+      ] },
+      "properties": { "label": "NEMO Link (UK–Belgium)", "status": "nominal" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [2.80, 56.40] },
+      "properties": {
+        "id": "nord-link-approach", "name": "NordLink Approach",
+        "status": "moderate", "icon": "info",
+        "desc": "NordLink HVDC cable (Norway–Germany, 1400MW). Crossed in F7 winds, 3.5m swell. Routine."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "LineString", "coordinates": [
+        [5.50, 53.50], [4.80, 54.50], [3.80, 55.50], [2.90, 56.50], [2.20, 57.80], [5.10, 59.90]
+      ] },
+      "properties": { "label": "NordLink (Norway–Germany)", "status": "moderate" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [3.90, 57.90] },
+      "properties": {
+        "id": "viking-link-transit", "name": "Viking Link Transit",
+        "status": "priority", "icon": "warn",
+        "desc": "Viking Link HVDC (UK–Denmark, 1400MW). Tracked parallel for 14nm. AIS alert triggered. Anchor secured, double bridge watch."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "LineString", "coordinates": [
+        [-0.50, 53.70], [1.20, 55.00], [2.80, 56.50], [4.00, 57.50], [4.80, 57.90], [8.10, 57.40]
+      ] },
+      "properties": { "label": "Viking Link (UK–Denmark)", "status": "priority" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [4.90, 59.50] },
+      "properties": {
+        "id": "norwegian-trench-entry", "name": "Norwegian Trench Entry",
+        "status": "moderate", "icon": "info",
+        "desc": "NPD pipeline cluster crossing. Depth >700m. Reduced speed. Multiple registered pipeline routes in zone."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "LineString", "coordinates": [
+        [3.50, 59.00], [4.20, 59.30], [5.00, 59.55], [5.80, 59.70], [6.50, 59.50]
+      ] },
+      "properties": { "label": "NPD Pipeline Cluster", "status": "moderate" }
+    }
+  ]
+}`;
+
+// ── DERIVE SITES FROM GEOJSON ─────────────────────────────────────────────────
+const STATUS_META = {
+  priority: { cls:'c-red',   color:'#ff3b3b', kwCls:'s-red',   label:'PRIORITY' },
+  moderate: { cls:'c-amber', color:'#f5a623', kwCls:'s-amber', label:'MODERATE' },
+  nominal:  { cls:'c-green', color:'#00e87a', kwCls:'s-green', label:'NOMINAL'  },
+};
+
+const geoData = JSON.parse(GEOJSON_SRC);
+const SITES = geoData.features
+  .filter(f => f.geometry.type === 'Point')
+  .map(f => {
+    const p = f.properties;
+    const meta = STATUS_META[p.status] ?? STATUS_META.nominal;
+    return { id: p.id, name: p.name, icon: p.icon, desc: p.desc, status: p.status,
+             coords: [f.geometry.coordinates[1], f.geometry.coordinates[0]],
+             cls: meta.cls, color: meta.color, kwCls: meta.kwCls, statusLabel: meta.label };
+  });
+
+// Inner paths only — assembled into full <svg> tags at each use site via makeSvg()
+const ICONS = {
+  warn:  { extra: 'stroke-linejoin="round"',                          paths: `<path stroke-width="1.9" d="M8 2.5L13.5 13H2.5L8 2.5z"/><line stroke-width="1.9" x1="8" y1="7" x2="8" y2="10"/><circle cx="8" cy="11.8" r="0.75" fill="currentColor" stroke="none"/>` },
+  info:  { extra: '',                                                   paths: `<circle stroke-width="1.9" cx="8" cy="8" r="5.5"/><line stroke-width="1.9" x1="8" y1="6" x2="8" y2="9.5"/><circle cx="8" cy="11.2" r="0.75" fill="currentColor" stroke="none"/>` },
+  check: { extra: 'stroke-linecap="round" stroke-linejoin="round"',   paths: `<circle stroke-width="1.9" cx="8" cy="8" r="5.5"/><polyline stroke-width="2.2" points="5.2,8.2 7.3,10.4 11.2,5.8"/>` },
+};
+
+function makeSvg(key, size, extraAttrs) {
+  const { extra, paths } = ICONS[key];
+  const attrs = [extra, extraAttrs].filter(Boolean).join(' ');
+  return `<svg width="${size}" height="${size}" viewBox="0 0 16 16" fill="none" stroke="currentColor" ${attrs}>${paths}</svg>`;
+}
+
+// ── KEYWORD RENDERER ─────────────────────────────────────────────────────────
+// Replaces [site-id] tokens in .scroll-body text with styled chip spans.
+// To add a keyword anywhere in the report, just write [site-id].
+function kwChip(site) {
+  return `<span class="kw ${site.kwCls}" data-id="${site.id}">`
+       + makeSvg(site.icon, 12, 'class="kw-ico"')
+       + `${site.name}</span>`;
+}
+
+function renderKeywords() {
+  const body = document.querySelector('.scroll-body');
+  // Build a map of id → chip HTML
+  const chips = Object.fromEntries(SITES.map(s => [s.id, kwChip(s)]));
+  // Walk every text node and replace [id] tokens
+  const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+  const replacements = [];
+  let node;
+  while ((node = walker.nextNode())) {
+    if (/\[[a-z-]+\]/.test(node.nodeValue)) replacements.push(node);
+  }
+  replacements.forEach(node => {
+    const html = node.nodeValue.replace(/\[([a-z-]+)\]/g, (_, id) => chips[id] ?? `[${id}]`);
+    const frag = document.createRange().createContextualFragment(html);
+    node.parentNode.replaceChild(frag, node);
+  });
+}
+
+// ── MAP ───────────────────────────────────────────────────────────────────────
+// Initialise without a view — fitBounds will set it after data loads
+const map = L.map('map', { zoomControl:false });
+
+// CartoCDN Dark Matter — free for open use with attribution
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  maxZoom: 19,
+  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &amp; © <a href="https://carto.com/attributions">CARTO</a>'
+}).addTo(map);
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let activeId = null;
+const markers = {};
+
+// ── CONNECTOR ─────────────────────────────────────────────────────────────────
+const cp   = document.getElementById('conn-path');
+const cnA  = document.getElementById('cn-a');
+const cnB  = document.getElementById('cn-b');
+const cnA2 = document.getElementById('cn-a2');
+const cnB2 = document.getElementById('cn-b2');
+const allCn = [cp, cnA, cnB, cnA2, cnB2];
+
+function styleConnector(color) {
+  cp.style.stroke   = color;
+  cp.style.filter   = `drop-shadow(0 0 4px ${color})`;
+  [cnA,cnB].forEach(e => { e.setAttribute('fill', color); e.style.filter = `drop-shadow(0 0 6px ${color})`; });
+  [cnA2,cnB2].forEach(e => { e.setAttribute('stroke', color); e.style.filter = `drop-shadow(0 0 4px ${color})`; });
+}
+
+function kwAnchor(id) {
+  const el = document.querySelector(`.kw[data-id="${id}"]`);
+  if (!el) return null;
+  const r = el.getBoundingClientRect();
+  return { x: r.right, y: r.top + r.height / 2 };
+}
+
+function markerAnchor(id) {
+  const m = markers[id];
+  if (!m) return null;
+  const pt = map.latLngToContainerPoint(m.getLatLng());
+  const mr = document.getElementById('map').getBoundingClientRect();
+  return { x: mr.left + pt.x, y: mr.top + pt.y };
+}
+
+function drawConn(id) {
+  const a = kwAnchor(id), b = markerAnchor(id);
+  if (!a || !b) return;
+  const cx = a.x + (b.x - a.x) * 0.52;
+  cp.setAttribute('d', `M${a.x},${a.y} C${cx},${a.y} ${cx},${b.y} ${b.x},${b.y}`);
+  [cnA,cnA2].forEach(e => { e.setAttribute('cx',a.x); e.setAttribute('cy',a.y); });
+  [cnB,cnB2].forEach(e => { e.setAttribute('cx',b.x); e.setAttribute('cy',b.y); });
+  allCn.forEach(e => e.classList.add('vis'));
+}
+
+function clearConn() { allCn.forEach(e => e.classList.remove('vis')); }
+
+// ── ACTIVATE ──────────────────────────────────────────────────────────────────
+function activate(id, src) {
+  if (activeId === id) { deactivate(); return; }
+  deactivate();
+  activeId = id;
+
+  document.querySelectorAll(`.kw[data-id="${id}"]`).forEach(e => e.classList.add('active'));
+
+  const site = SITES.find(s => s.id === id);
+  styleConnector(site.color);
+
+  const m = markers[id];
+  if (m) {
+    m.getElement()?.querySelector('.site-icon')?.classList.add('active');
+    if (src !== 'marker') map.panTo(m.getLatLng(), { animate:true, duration:0.4 });
+    m.bindPopup(
+      `<div class="pu-status" style="color:${site.color}">${site.statusLabel}</div>
+       <div class="pu-name">${site.name}</div>
+       <div class="pu-desc">${site.desc}</div>`,
+      { offset:[0,-20], closeButton:false, autoPan:false }
+    ).openPopup();
+  }
+
+  setTimeout(() => drawConn(id), src === 'keyword' ? 0 : 260);
+}
+
+function deactivate() {
+  if (!activeId) return;
+  document.querySelectorAll('.kw').forEach(e => e.classList.remove('active'));
+  Object.values(markers).forEach(m => {
+    m.getElement()?.querySelector('.site-icon')?.classList.remove('active');
+    m.closePopup();
+  });
+  clearConn();
+  activeId = null;
+}
+
+// ── RENDER LINES FROM GEOJSON ────────────────────────────────────────────────
+const LINE_COLOR = { priority:'#ff3b3b', moderate:'#f5a623', nominal:'#00e87a' };
+
+geoData.features
+  .filter(f => f.geometry.type === 'LineString' || f.geometry.type === 'MultiLineString')
+  .forEach(f => {
+    const p   = f.properties ?? {};
+    const col = LINE_COLOR[p.status] ?? '#3a7ca8';
+    const coords = f.geometry.type === 'LineString'
+      ? f.geometry.coordinates.map(c => [c[1], c[0]])
+      : f.geometry.coordinates.map(ring => ring.map(c => [c[1], c[0]]));
+    const pl = L.polyline(coords, {
+      color: col, weight: 2, opacity: 0.55, dashArray: '6 5'
+    }).addTo(map);
+    if (p.label) pl.bindTooltip(p.label, {
+      permanent: false, className: 'line-tooltip', direction: 'center'
+    });
+  });
+
+// ── RENDER KEYWORDS THEN BUILD MARKERS ───────────────────────────────────────
+renderKeywords();
+
+// Wire up keyword clicks (must run after renderKeywords inserts the elements)
+document.querySelectorAll('.kw').forEach(el => {
+  el.addEventListener('click', e => { e.stopPropagation(); activate(el.dataset.id, 'keyword'); });
+});
+
+SITES.forEach(s => {
+  const icon = L.divIcon({
+    html: `<div class="site-icon ${s.cls}">${makeSvg(s.icon, 19)}</div>`,
+    className: '', iconSize:[34,34], iconAnchor:[17,17]
+  });
+  const m = L.marker(s.coords, { icon }).addTo(map);
+  markers[s.id] = m;
+  m.on('click', () => activate(s.id, 'marker'));
+});
+
+// ── FIT MAP TO GEOJSON BOUNDING BOX ─────────────────────────────────────────
+function bboxFit(data) {
+  let minLng =  Infinity, maxLng = -Infinity;
+  let minLat =  Infinity, maxLat = -Infinity;
+  function visit(coords) {
+    if (typeof coords[0] === 'number') {
+      minLng = Math.min(minLng, coords[0]); maxLng = Math.max(maxLng, coords[0]);
+      minLat = Math.min(minLat, coords[1]); maxLat = Math.max(maxLat, coords[1]);
+    } else { coords.forEach(visit); }
+  }
+  data.features.forEach(f => visit(f.geometry.coordinates));
+  map.fitBounds([[minLat, minLng], [maxLat, maxLng]], { padding: [40, 40] });
+}
+bboxFit(geoData);
+
+// ── EVENTS ────────────────────────────────────────────────────────────────────
+document.addEventListener('click', e => {
+  if (!e.target.closest('.kw') && !e.target.closest('.leaflet-marker-icon')) deactivate();
+});
+
+map.on('move zoom', () => { if (activeId) drawConn(activeId); });
+window.addEventListener('resize', () => { if (activeId) drawConn(activeId); });
+</script>
+</body>
+</html>
