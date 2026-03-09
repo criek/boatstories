@@ -533,10 +533,17 @@ function renderKeywords() {
 // Initialise without a view — fitBounds will set it after data loads
 const map = L.map('map', { zoomControl:false });
 
-// CartoCDN Dark Matter — free for open use with attribution
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  maxZoom: 19,
-  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &amp; © <a href="https://carto.com/attributions">CARTO</a>'
+// EMODnet baselayer via WMTS (pre-rendered tiles, web mercator tileset).
+// Filter applied to the pane so there are no per-tile seam artefacts.
+map.createPane('bathyPane');
+map.getPane('bathyPane').style.zIndex = 200;
+map.getPane('bathyPane').style.filter = 'brightness(0.5) saturate(0.75)';
+
+L.tileLayer('https://tiles.emodnet-bathymetry.eu/2020/baselayer/web_mercator/{z}/{x}/{y}.png', {
+  maxZoom: 11,
+  pane: 'bathyPane',
+  attribution: '<a href="https://emodnet.ec.europa.eu/en/bathymetry">EMODnet Bathymetry DTM 2024</a>',
+  className: 'bathy-tile',
 }).addTo(map);
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
