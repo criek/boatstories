@@ -14,6 +14,7 @@
     "sanctions": "EU, UK (OFSI), US (OFAC)"
   },
   "dataSources": {
+    "vessels": "/data/vessels_merged.json",
     "infrastructure": "/data/openstreetmapdata-export.geojson",
     "etheraLine": "/ethera/ethera.data.line.geojson",
     "etheraPoints": "/ethera/ethera.data.points.geojson",
@@ -37,7 +38,7 @@
       {
         "title": "Suspicious activity context",
         "paragraphs": [
-          "Vessel activity was reported close to critical infrastructure, including wind farms and subsea cables, and AIS was reportedly switched off during the period of interest. This pattern is consistent with possible reconnaissance or infrastructure-mapping behavior."
+          "A <b class=\"kw s-red\">suspicious MMSI change</b> was reported by the French navy for this ship. Vessel activity was reported <b class=\"kw s-red\">close to critical infrastructure</b>, including wind farms and subsea cables, and <b class=\"kw s-red\">AIS was reportedly switched off</b> during the period of interest. This pattern is consistent with possible reconnaissance or infrastructure-mapping behavior."
         ]
       },
       {

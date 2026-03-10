@@ -226,7 +226,38 @@
   }
   .vessel-summary-info { flex: 1; }
   .vessel-summary-name { font-size: 1.1rem; font-weight: 600; color: var(--text-hi); margin-bottom: 4px; }
-  .vessel-summary-meta { font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; }
+  .vessel-summary-meta { font-size: 0.85rem; color: var(--text); line-height: 1.6; letter-spacing: 0.02em; }
+
+  /* ── SHIPS TAB ── */
+  .ship-card {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: rgba(26,42,58,0.5);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .ship-card:hover { border-color: var(--border-hi); }
+  .ship-card.ethera-first { border-left: 3px solid var(--cyan); }
+  .ship-card img {
+    width: 80px;
+    min-width: 80px;
+    height: 60px;
+    min-height: 60px;
+    object-fit: cover;
+    border-radius: 3px;
+    border: 1px solid var(--border-hi);
+    background: var(--border);
+  }
+  .ship-card-info { flex: 1; min-width: 0; }
+  .ship-card-name { font-size: 0.9rem; font-weight: 600; color: var(--text-hi); margin-bottom: 2px; }
+  .ship-card-meta { font-size: 0.7rem; color: var(--text); line-height: 1.4; }
+  .ship-card-alert { font-size: 0.6rem; margin-top: 4px; font-weight: 600; letter-spacing: 0.05em; }
+  .ship-card-alert.high { color: var(--red); }
+  .ship-card-alert.mid { color: var(--amber); }
+  .ship-card-alert.low { color: var(--cyan); }
 
   .sec {
     font-family: 'Share Tech Mono', monospace;
@@ -280,6 +311,12 @@
   .kw.s-green.active { border-color:var(--green); color:var(--green); background:var(--green-dim); box-shadow:0 0 14px rgba(0,232,122,0.35); }
 
   .kw:hover .kw-ico, .kw.active .kw-ico { opacity: 1; }
+
+  div#report-body b {
+      color: #f5a623;
+      font: inherit;
+      font-weight: bold;
+  }
 
   /* ── LEGEND ── */
   .legend {
@@ -411,11 +448,12 @@
     </div>
 
     <div class="tabs">
-      <div class="tab active" data-tab="vessel">VESSEL</div>
+      <div class="tab active" data-tab="ships">SHIPS</div>
+      <div class="tab" data-tab="vessel">VESSEL</div>
       <div class="tab" data-tab="alerts">ALERTS</div>
     </div>
 
-    <div class="tab-pane active" id="pane-vessel">
+    <div class="tab-pane" id="pane-vessel">
     <div class="scroll-body" id="report-body">
       <div id="vessel-summary" class="vessel-summary" style="display:none"></div>
       <div class="loading-msg" id="loading-msg">Loading data…</div>
@@ -441,6 +479,10 @@
 
     <div class="tab-pane" id="pane-alerts">
       <div id="alerts-content"></div>
+    </div>
+
+    <div class="tab-pane active" id="pane-ships">
+      <div id="ships-content"></div>
     </div>
   </div>
 
@@ -583,16 +625,17 @@ async function init() {
        : JSON.parse(DEMO_GEOJSON));
 
   // Fetch additional layers from dataSources
-  let infrastructure = null, etheraLine = null, etheraPoints = null, etheraIntersection = null, etheraAlerts = null;
+  let infrastructure = null, etheraLine = null, etheraPoints = null, etheraIntersection = null, etheraAlerts = null, vesselsData = null;
   const ds = config?.dataSources ?? {};
   const base = new URL('.', location.href).href;
   const fetchOpt = (path) => path ? fetch(new URL(path, base)).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null);
-  [infrastructure, etheraLine, etheraPoints, etheraIntersection, etheraAlerts] = await Promise.all([
+  [infrastructure, etheraLine, etheraPoints, etheraIntersection, etheraAlerts, vesselsData] = await Promise.all([
     fetchOpt(ds.infrastructure),
     fetchOpt(ds.etheraLine),
     fetchOpt(ds.etheraPoints),
     fetchOpt(ds.etheraIntersection),
-    fetchOpt(ds.etheraAlerts)
+    fetchOpt(ds.etheraAlerts),
+    fetchOpt(ds.vessels)
   ]);
 
   // Apply config to header/panel
@@ -735,6 +778,61 @@ async function init() {
   } else {
     alertsEl.innerHTML = '<p class="loading-msg">No alert data. Run: python synthetic_data_engine.py --analyze</p>';
   }
+
+  // Render ships tab — ETHERA first, then vessels from vessels_merged.json. Each card has a ship image.
+  // Vessels with images use their photo; others cycle through available images (avoids 404s, ensures all load).
+  const shipsEl = document.getElementById('ships-content');
+  const safeShip = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+  const boatsBase = new URL('../boats/', location.href).href;
+  const boatsImos = ['9387279','9188245','8545783','9995894','9402653','02333477'];
+  const boatsImosSet = new Set(boatsImos);
+  const vessels = Array.isArray(vesselsData) ? vesselsData : [];
+  const otherVessels = vessels
+    .filter(v => v.IMO !== '9387279')
+    .sort((a, b) => (boatsImosSet.has(b.IMO) ? 1 : 0) - (boatsImosSet.has(a.IMO) ? 1 : 0))
+    .slice(0, 11);
+  const shipImgSrc = (imo, explicitPath, fallbackIndex) => {
+    if (explicitPath && (explicitPath.startsWith('http') || explicitPath.startsWith('data:'))) return explicitPath;
+    if (explicitPath && explicitPath.startsWith('/')) return new URL(explicitPath, location.origin).href;
+    if (imo && boatsImosSet.has(String(imo))) return boatsBase + imo + '.jpeg';
+    return boatsBase + boatsImos[fallbackIndex % boatsImos.length] + '.jpeg';
+  };
+  const otherScores = [7, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1];
+  const getScore = (imo, index) => imo === '9387279' ? 9 : otherScores[index % otherScores.length];
+  const shipAlertBadge = (score) => {
+    const level = score >= 6 ? 'high' : score >= 3 ? 'mid' : 'low';
+    const label = score >= 6 ? (score >= 9 ? 'High-priority alert' : 'Escalate') : score >= 3 ? 'Review' : 'Low concern';
+    return `<div class="ship-card-alert ${level}">Score ${score} · ${label}</div>`;
+  };
+  const allShips = [];
+  if (config?.vessel) allShips.push({ type: 'ethera', imo: config.vessel.imo, name: config.vessel.name, meta: [config.vessel.type, config.vessel.built && `Built ${config.vessel.built}`, config.vessel.size, config.vessel.flag].filter(Boolean), image: config.vessel.image });
+  otherVessels.forEach((v, i) => allShips.push({ type: 'other', imo: v.IMO || '', name: v.Name, meta: [v['LLI Vessel Type'] || v['Vessel Type and Size'], v.Built && `Built ${v.Built}`, v['Length Overall (m)'] && `${v['Length Overall (m)']} m`, v.Flag].filter(Boolean), image: null, idx: i }));
+  allShips.forEach((s, i) => { s._score = getScore(s.imo, s.type === 'ethera' ? 0 : (s.idx || i) + 1); });
+  allShips.sort((a, b) => b._score - a._score);
+  let imgIndex = 0;
+  let shipsHtml = '';
+  allShips.forEach((s) => {
+    const src = s.type === 'ethera' ? shipImgSrc(s.imo, s.image, imgIndex++) : shipImgSrc(s.imo, null, imgIndex++);
+    const meta = s.meta.map(safeShip).join(' · ');
+    const alertBadge = shipAlertBadge(s._score);
+    const cardClass = s.type === 'ethera' ? 'ship-card ethera-first ship-card-clickable' : 'ship-card';
+    const dataAttr = s.type === 'ethera' ? ' data-goto-tab="vessel"' : '';
+    shipsHtml += `<div class="${cardClass}"${dataAttr}><img src="${safeShip(src)}" alt="${safeShip(s.name)}"><div class="ship-card-info"><div class="ship-card-name">${safeShip(s.name)}</div><div class="ship-card-meta">${meta}</div>${alertBadge}</div></div>`;
+  });
+  shipsEl.innerHTML = shipsHtml || '<p class="loading-msg">No vessel data.</p>';
+
+  shipsEl.querySelectorAll('.ship-card-clickable').forEach(card => {
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', () => {
+      const tab = card.dataset.gotoTab;
+      if (tab) {
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(x => x.classList.remove('active'));
+        document.querySelector(`.tab[data-tab="${tab}"]`)?.classList.add('active');
+        document.getElementById(`pane-${tab}`)?.classList.add('active');
+      }
+    });
+  });
 
   runMap(geoData, { infrastructure, etheraLine, etheraPoints, etheraIntersection, etheraAlerts });
 }
