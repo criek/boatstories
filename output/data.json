@@ -1,0 +1,107 @@
+{
+  "title": "Ethera — Vessel Transit & Infrastructure",
+  "reference": "REF-ETH-2026",
+  "eventCount": 0,
+  "dataSources": {
+    "infrastructure": "data/openstreetmapdata-export.geojson",
+    "etheraLine": "data/ethera/ethera.line.geojson",
+    "etheraPoints": "data/ethera/ethera.points.geojson",
+    "etheraIntersection": "data/ethera/ethera-intersection.geojson"
+  },
+  "report": {
+    "sections": [
+      {
+        "title": "// voyage summary",
+        "paragraphs": [
+          "Ethera vessel track overlaid on critical infrastructure (pipelines, submarine cables, wind farms) in the Belgian/Dutch coastal zone. Data from OpenStreetMap and Ethera."
+        ]
+      },
+      {
+        "title": "// layers",
+        "paragraphs": [
+          "Infrastructure: wind farms, restricted areas, anchorages, submarine cables. Ship track: Ethera GPS positions."
+        ]
+      }
+    ]
+  },
+  "geojson": null,
+  "geojsonDemo": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": { "type": "LineString", "coordinates": [
+          [-0.18, 53.64], [0.42, 54.10], [1.20, 54.82],
+          [2.05, 55.60], [2.80, 56.40], [3.30, 57.20],
+          [3.90, 57.90], [4.60, 58.80], [4.90, 59.50],
+          [5.20, 60.39]
+        ] },
+        "properties": { "label": "MV Stellarfjord track", "status": "nominal" }
+      },
+      {
+        "type": "Feature",
+        "geometry": { "type": "Point", "coordinates": [1.20, 54.82] },
+        "properties": {
+          "id": "nemo-crossing", "name": "NEMO Crossing",
+          "status": "nominal", "icon": "check",
+          "desc": "NEMO interconnector (UK–Belgium, 1000MW HVDC). Crossed at 6 kts, 0312 UTC. No anomalies."
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": { "type": "LineString", "coordinates": [
+          [-1.50, 54.20], [0.00, 54.60], [1.50, 54.92], [3.20, 55.10], [5.00, 54.90]
+        ] },
+        "properties": { "label": "NEMO Link (UK–Belgium)", "status": "nominal" }
+      },
+      {
+        "type": "Feature",
+        "geometry": { "type": "Point", "coordinates": [2.80, 56.40] },
+        "properties": {
+          "id": "nord-link-approach", "name": "NordLink Approach",
+          "status": "moderate", "icon": "info",
+          "desc": "NordLink HVDC cable (Norway–Germany, 1400MW). Crossed in F7 winds, 3.5m swell. Routine."
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": { "type": "LineString", "coordinates": [
+          [5.50, 53.50], [4.80, 54.50], [3.80, 55.50], [2.90, 56.50], [2.20, 57.80], [5.10, 59.90]
+        ] },
+        "properties": { "label": "NordLink (Norway–Germany)", "status": "moderate" }
+      },
+      {
+        "type": "Feature",
+        "geometry": { "type": "Point", "coordinates": [3.90, 57.90] },
+        "properties": {
+          "id": "viking-link-transit", "name": "Viking Link Transit",
+          "status": "priority", "icon": "warn",
+          "desc": "Viking Link HVDC (UK–Denmark, 1400MW). Tracked parallel for 14nm. AIS alert triggered. Anchor secured, double bridge watch."
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": { "type": "LineString", "coordinates": [
+          [-0.50, 53.70], [1.20, 55.00], [2.80, 56.50], [4.00, 57.50], [4.80, 57.90], [8.10, 57.40]
+        ] },
+        "properties": { "label": "Viking Link (UK–Denmark)", "status": "priority" }
+      },
+      {
+        "type": "Feature",
+        "geometry": { "type": "Point", "coordinates": [4.90, 59.50] },
+        "properties": {
+          "id": "norwegian-trench-entry", "name": "Norwegian Trench Entry",
+          "status": "moderate", "icon": "info",
+          "desc": "NPD pipeline cluster crossing. Depth >700m. Reduced speed. Multiple registered pipeline routes in zone."
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": { "type": "LineString", "coordinates": [
+          [3.50, 59.00], [4.20, 59.30], [5.00, 59.55], [5.80, 59.70], [6.50, 59.50]
+        ] },
+        "properties": { "label": "NPD Pipeline Cluster", "status": "moderate" }
+      }
+    ]
+  }
+}
