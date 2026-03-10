@@ -1,0 +1,10 @@
+Course / Speed	117.6° / 8.2 kn
+Current draught	5.4 m
+Navigation Status	Under way
+Position received	
+0 min ago
+IMO / MMSI	9995894 / 255916493
+Callsign	CQ2762
+AIS Type	Cargo ship
+AIS Flag	Portugal (Madeira)
+Length / Beam	89 / 13 m

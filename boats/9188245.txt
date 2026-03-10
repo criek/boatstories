@@ -1,0 +1,10 @@
+Course / Speed	317.1° / 4.7 kn
+Current draught	5.8 m
+Navigation Status	Under way
+Position received	
+0 min ago
+IMO / MMSI	9188245 / 232034271
+Callsign	MIUZ3
+AIS Type	Cargo ship
+AIS Flag	United Kingdom (UK)
+Length / Beam	185 / 26 m

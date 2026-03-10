@@ -1,0 +1,10 @@
+Course / Speed	139.6° / 10.1 kn
+Current draught	4.2 m
+Navigation Status	Under way
+Position received	
+0 min ago
+IMO / MMSI	9402653 / 245405000
+Callsign	PHPF
+AIS Type	Tanker
+AIS Flag	Netherlands
+Length / Beam	110 / 14 m

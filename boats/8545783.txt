@@ -1,0 +1,10 @@
+Course / Speed	86.9° / 3.1 kn
+Current draught	-
+Navigation Status	Under way
+Position received	
+1 min ago
+IMO / MMSI	8545783 / 205291000
+Callsign	OPDA
+AIS Type	Unknown
+AIS Flag	Belgium
+Length / Beam	24 / 6 m

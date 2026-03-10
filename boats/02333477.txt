@@ -1,0 +1,10 @@
+Course / Speed	80.7° / 5.8 kn
+Current draught	2.4 m
+Navigation Status	Under way
+Position received	
+0 min ago
+ENI / MMSI	02333477 / 244700721
+Callsign	PB8117
+AIS Type	Tanker
+AIS Flag	Netherlands
+Length / Beam	85 / 10 m
