@@ -1,1 +1,4 @@
 pandas
+pyle38
+geopandas
+shapely
