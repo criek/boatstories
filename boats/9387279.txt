@@ -1,0 +1,10 @@
+Koers / Snelheid	192.8° / 0.0 kn
+Huidige Diepgang	7.2 m
+Navigatiestatus	Moored
+Positie ontvangen	
+0 min ago
+IMO / MMSI	9387279 / 632001149
+Roepnaam	3X2122
+AIS-type	Tanker
+AIS Vlag	Guinea
+Lengte / Breedte	183 / 32 m
