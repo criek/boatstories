@@ -1,10 +1,10 @@
-Koers / Snelheid	324.3° / 19.8 kn
-Huidige Diepgang	16.6 m
-Navigatiestatus	-
-Positie ontvangen	
-3 days ago
-IMO / MMSI	9975791 / 563272300
-Roepnaam	9V8096
-AIS-type	Cargo ship (HAZ-D)
-AIS Vlag	Singapore
-Lengte / Breedte	399 / 61 m
+Course / Speed	139.6° / 10.1 kn
+Current draught	4.2 m
+Navigation Status	Under way
+Position received	
+0 min ago
+IMO / MMSI	9402653 / 245405000
+Callsign	PHPF
+AIS Type	Tanker
+AIS Flag	Netherlands
+Length / Beam	110 / 14 m

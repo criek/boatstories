@@ -1,10 +1,10 @@
-Koers / Snelheid	41.4° / 14.5 kn
-Huidige Diepgang	10.9 m
-Navigatiestatus	-
-Positie ontvangen	
-4 days ago
-IMO / MMSI	9839210 / 228038360
-Roepnaam	FMPF
-AIS-type	Cargo ship (HAZ-A)
-AIS Vlag	France
-Lengte / Breedte	400 / 62 m
+Course / Speed	317.1° / 4.7 kn
+Current draught	5.8 m
+Navigation Status	Under way
+Position received	
+0 min ago
+IMO / MMSI	9188245 / 232034271
+Callsign	MIUZ3
+AIS Type	Cargo ship
+AIS Flag	United Kingdom (UK)
+Length / Beam	185 / 26 m

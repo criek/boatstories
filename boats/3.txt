@@ -1,11 +1,10 @@
-
-Koers / Snelheid	139.2° / 0.0 kn
-Huidige Diepgang	-
-Navigatiestatus	-
-Positie ontvangen	
-52 days ago
-IMO / MMSI	9831684 / 650000123
-Roepnaam	C91SPF
-AIS-type	Other type
-AIS Vlag	Mozambique
-Lengte / Breedte	424 / 66 m
+Course / Speed	86.9° / 3.1 kn
+Current draught	-
+Navigation Status	Under way
+Position received	
+1 min ago
+IMO / MMSI	8545783 / 205291000
+Callsign	OPDA
+AIS Type	Unknown
+AIS Flag	Belgium
+Length / Beam	24 / 6 m
