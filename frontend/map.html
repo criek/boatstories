@@ -309,6 +309,10 @@
   .pu-status { font-family:'Share Tech Mono',monospace; font-size:0.56rem; letter-spacing:0.18em; margin-bottom:3px; }
   .pu-name   { font-size:0.92rem; font-weight:600; color:var(--text-hi); letter-spacing:0.04em; margin-bottom:4px; }
   .pu-desc   { font-size:0.78rem; color:var(--text); line-height:1.5; max-width:195px; }
+  .pu-prop   { font-family:'Share Tech Mono',monospace; font-size:0.62rem; font-weight:400; color:var(--text-dim); margin-bottom:2px; }
+  .pu-prop-k { color:var(--cyan); opacity:0.8; }
+  .pu-prop-v { color:var(--text); margin-left:4px; word-break:break-word; max-width:220px; }
+  .pu-props  { margin-top:8px; padding-top:8px; border-top:1px solid var(--border); max-height:180px; overflow-y:auto; }
 
   .leaflet-control-attribution {
     background: rgba(8,12,16,0.8) !important;
@@ -417,7 +421,7 @@
 </div>
 
 <!-- Embedded config fallback (used when fetch fails, e.g. file://) -->
-<script type="application/json" id="config-fallback">{"title":"Ethera — Vessel Transit","reference":"REF-ETH-2026","eventCount":0,"dataSources":{"infrastructure":"data/openstreetmapdata-export.geojson","etheraLine":"data/ethera/ethera.line.geojson","etheraPoints":"data/ethera/ethera.points.geojson","etheraIntersection":"data/ethera/ethera-intersection.geojson","etheraAlerts":"data/ethera/ethera-alerts.json"},"report":{"sections":[{"title":"// voyage summary","paragraphs":["Ethera vessel track overlaid on critical infrastructure. Run: python synthetic_data_engine.py loitering"]}]},"geojson":null}</script>
+<script type="application/json" id="config-fallback">{"title":"Ethera — Vessel Transit","reference":"REF-ETH-2026","eventCount":0,"dataSources":{"infrastructure":"/data/openstreetmapdata-export.geojson","etheraLine":"/ethera/ethera.data.line.geojson","etheraPoints":"/ethera/ethera.data.points.geojson","etheraIntersection":"/ethera/ethera.data-intersection.geojson","etheraAlerts":"/ethera/ethera-alerts.json"},"report":{"sections":[{"title":"// risk assessment","paragraphs":["Estimated risk assessment: ~80–85% elevated risk. The vessel [energy-progress] (IMO 9387279) is a 2008-built medium-range product/chemical tanker (~46,600 DWT; 183 m × 32 m; service speed ~14–15 kn) whose risk profile is significantly increased due to identity manipulation indicators, including a change of MMSI and operation under a false Guinea flag, both commonly linked to sanctions-evasion practices used by parts of the Russian shadow tanker fleet.","Although factors such as age (~17 years), reflagging history, and ownership transfers can occur in normal tanker markets, the combination of a fraudulent flag, AIS identity changes, and transit through the busy North Sea–English Channel [track] with multiple subsea [cable-crossings] would likely trigger high-priority monitoring by maritime security and coast-watch authorities."]},{"title":"// map & data reference","paragraphs":["<span id=\"data-ref\"></span>See [track] and [cable-crossings] on map. Click the track (green line) for voyage summary. Click track points for timestamps. Red markers show cable/pipeline crossings — click for details. See Alerts tab for scored points."]}]},"geojson":null}</script>
 
 <!-- Connector SVG overlay -->
 <svg id="conn-svg" xmlns="http://www.w3.org/2000/svg">
@@ -575,6 +579,20 @@ async function init() {
         (sec.paragraphs || []).map(p => `<p>${p}</p>`).join('');
       reportBody.insertBefore(div, legend);
     });
+    // Populate data reference from ethera layers
+    const dataRef = document.getElementById('data-ref');
+    if (dataRef) {
+      const nPoints = etheraPoints?.features?.length ?? 0;
+      const nCrossings = etheraIntersection?.features?.filter(f => f.properties?.['_role'] === 'intersection_centroid')?.length ?? 0;
+      const lineProps = etheraLine?.features?.[0]?.properties;
+      const start = lineProps?.start ? new Date(lineProps.start).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+      const end = lineProps?.end ? new Date(lineProps.end).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+      const parts = [];
+      if (nPoints) parts.push(`${nPoints} track points`);
+      if (start && end) parts.push(`${start} – ${end}`);
+      if (nCrossings) parts.push(`${nCrossings} cable crossings`);
+      dataRef.textContent = parts.length ? parts.join(' · ') + '. ' : '';
+    }
   } else {
     loadingMsg.textContent = 'No report data. Map only.';
     loadingMsg.style.display = 'block';
@@ -610,10 +628,12 @@ async function init() {
   runMap(geoData, { infrastructure, etheraLine, etheraPoints, etheraIntersection });
 }
 
+function slug(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'crossing'; }
+
 function runMap(geoData, layers = {}) {
   const { infrastructure, etheraLine, etheraPoints, etheraIntersection } = layers;
   const features = geoData?.features ?? [];
-  const SITES = features
+  let SITES = features
     .filter(f => f?.geometry?.type === 'Point')
     .map(f => {
       const p = f.properties ?? {};
@@ -622,6 +642,39 @@ function runMap(geoData, layers = {}) {
                coords: [f.geometry.coordinates[1], f.geometry.coordinates[0]],
                cls: meta.cls, color: meta.color, kwCls: meta.kwCls, statusLabel: meta.label };
     });
+
+  // Add SITES from ethera data for tag linking
+  const etheraSites = [];
+  let trackBounds = null;
+  if (etheraLine?.features?.[0]?.geometry?.coordinates?.length) {
+    const coords = etheraLine.features[0].geometry.coordinates;
+    const lats = coords.map(c => c[1]), lngs = coords.map(c => c[0]);
+    const cLat = (Math.min(...lats) + Math.max(...lats)) / 2;
+    const cLng = (Math.min(...lngs) + Math.max(...lngs)) / 2;
+    trackBounds = [[Math.min(...lats), Math.min(...lngs)], [Math.max(...lats), Math.max(...lngs)]];
+    etheraSites.push({ id: 'track', name: 'Vessel track', icon: 'check', desc: 'Ethera voyage track', status: 'nominal',
+      coords: [cLat, cLng], cls: 'c-green', color: '#00e87a', kwCls: 's-green', statusLabel: 'TRACK', _trackBounds: trackBounds });
+    etheraSites.push({ id: 'energy-progress', name: 'ENERGY PROGRESS', icon: 'info', desc: 'Vessel track', status: 'nominal',
+      coords: [cLat, cLng], cls: 'c-green', color: '#00e87a', kwCls: 's-green', statusLabel: 'VESSEL', _trackBounds: trackBounds });
+  }
+  const centroids = etheraIntersection?.features?.filter(f => f.geometry?.type === 'Point' && f.properties?.['_role'] === 'intersection_centroid') ?? [];
+  let firstCrossingId = null;
+  centroids.forEach((f, i) => {
+    const p = f.properties;
+    const name = p.name || p.description || p['seamark:name'] || 'Cable crossing';
+    const baseId = slug(name);
+    const id = `${baseId}-${p._hitIndex ?? i}`;
+    if (!firstCrossingId) firstCrossingId = id;
+    etheraSites.push({ id, name, icon: 'warn', desc: 'Cable/pipeline crossing', status: 'priority',
+      coords: [f.geometry.coordinates[1], f.geometry.coordinates[0]],
+      cls: 'c-red', color: '#ff3b3b', kwCls: 's-red', statusLabel: 'CROSSING' });
+  });
+  if (firstCrossingId && !etheraSites.some(s => s.id === 'cable-crossings')) {
+    const first = etheraSites.find(s => s.id === firstCrossingId);
+    etheraSites.unshift({ id: 'cable-crossings', name: 'Cable crossings', icon: 'warn', desc: 'Subsea cable crossings', status: 'priority',
+      coords: first.coords, cls: 'c-red', color: '#ff3b3b', kwCls: 's-red', statusLabel: 'CROSSINGS', _aliasOf: firstCrossingId });
+  }
+  SITES = SITES.concat(etheraSites);
 
   // Inner paths only — assembled into full <svg> tags at each use site via makeSvg()
   const ICONS = {
@@ -654,10 +707,10 @@ function renderKeywords() {
   const replacements = [];
   let node;
   while ((node = walker.nextNode())) {
-    if (/\[[a-z-]+\]/.test(node.nodeValue)) replacements.push(node);
+    if (/\[[a-z0-9-]+\]/.test(node.nodeValue)) replacements.push(node);
   }
   replacements.forEach(node => {
-    const html = node.nodeValue.replace(/\[([a-z-]+)\]/g, (_, id) => chips[id] ?? `[${id}]`);
+    const html = node.nodeValue.replace(/\[([a-z0-9-]+)\]/g, (_, id) => chips[id] ?? `[${id}]`);
     const frag = document.createRange().createContextualFragment(html);
     node.parentNode.replaceChild(frag, node);
   });
@@ -735,17 +788,20 @@ function activate(id, src) {
   document.querySelectorAll(`.kw[data-id="${id}"]`).forEach(e => e.classList.add('active'));
 
   const site = SITES.find(s => s.id === id);
+  if (!site) return;
   styleConnector(site.color);
 
-  const m = markers[id];
-  if (m) {
-    m.getElement()?.querySelector('.site-icon')?.classList.add('active');
-    if (src !== 'marker') map.panTo(m.getLatLng(), { animate:true, duration:0.4 });
+  const m = markers[site._aliasOf || id];
+  if (m) m.getElement()?.querySelector('.site-icon')?.classList.add('active');
+  if (site._trackBounds) {
+    if (src !== 'marker') map.fitBounds(site._trackBounds, { animate: true, duration: 0.4, padding: [60, 60] });
+  } else if (m) {
+    if (src !== 'marker') map.panTo(m.getLatLng(), { animate: true, duration: 0.4 });
     m.bindPopup(
       `<div class="pu-status" style="color:${site.color}">${site.statusLabel}</div>
        <div class="pu-name">${site.name}</div>
        <div class="pu-desc">${site.desc}</div>`,
-      { offset:[0,-20], closeButton:false, autoPan:false }
+      { offset: [0, -20], closeButton: false, autoPan: false }
     ).openPopup();
   }
 
@@ -763,6 +819,27 @@ function deactivate() {
   activeId = null;
 }
 
+// ── FORMAT GEOJSON PROPERTIES FOR DISPLAY ────────────────────────────────────
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function formatTimestamp(v) {
+  if (v == null) return '';
+  if (typeof v === 'number' && v > 1e9) return new Date(v * 1000).toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+  if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}/.test(v)) return v.replace('T', ' ').slice(0, 19);
+  return String(v);
+}
+function formatPropsForPopup(props, opts = {}) {
+  const { exclude = ['@geometry'], keyLabels = {} } = opts;
+  const label = (k) => keyLabels[k] ?? k.replace(/_/g, ' ').replace(/^@/, 'id').replace(/^seamark:/, '');
+  const timestampKeys = ['timestamp', '_timestamp', 'start', 'end', 'datetime'];
+  const rows = Object.entries(props || {})
+    .filter(([k]) => !exclude.includes(k) && props[k] != null && props[k] !== '')
+    .map(([k, v]) => {
+      const val = timestampKeys.includes(k) ? formatTimestamp(v) : (typeof v === 'object' ? JSON.stringify(v) : String(v));
+      return `<div class="pu-prop"><span class="pu-prop-k">${esc(label(k))}</span> <span class="pu-prop-v">${esc(val)}</span></div>`;
+    });
+  return rows.length ? `<div class="pu-props">${rows.join('')}</div>` : '';
+}
+
 // ── RENDER INFRASTRUCTURE (pipelines, cables, wind farms) ────────────────────
 function addGeoJsonLayer(data, options = {}) {
   if (!data?.features?.length) return;
@@ -775,6 +852,7 @@ function addGeoJsonLayer(data, options = {}) {
     const type = p['seamark:type'] || '';
     if (g.type === 'Polygon' || g.type === 'MultiPolygon') {
       const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
+      const popupHtml = `<div class="pu-status" style="color:#f5a623">${esc(type || 'Infrastructure')}</div><div class="pu-name">${esc(name || '—')}</div>${formatPropsForPopup(p, { exclude: ['@geometry'], keyLabels: { 'seamark:name': 'Seamark', 'seamark:type': 'Type', 'plant:output:electricity': 'Output', operator: 'Operator' } })}`;
       polys.forEach(poly => {
         const outer = poly[0];
         const latlngs = outer.map(c => [c[1], c[0]]);
@@ -784,17 +862,22 @@ function addGeoJsonLayer(data, options = {}) {
           fillOpacity: 0.25,
           weight: 1,
           opacity: 0.6
-        }).bindTooltip(type || name || 'Infrastructure', { permanent: false, className: 'line-tooltip' }).addTo(map);
+        }).bindTooltip(type || name || 'Infrastructure', { permanent: false, className: 'line-tooltip' })
+          .bindPopup(popupHtml, { offset: [0, -20], closeButton: false })
+          .addTo(map);
       });
     } else if (g.type === 'LineString') {
       const latlngs = g.coordinates.map(c => [c[1], c[0]]);
       const cableColor = type === 'cable_submarine' ? '#00d4ff' : '#8ba8be';
+      const popupHtml = `<div class="pu-status" style="color:${cableColor}">${esc(type || 'Line')}</div><div class="pu-name">${esc(name || '—')}</div>${formatPropsForPopup(p, { exclude: ['@geometry'], keyLabels: { description: 'Route', operator: 'Operator', 'seamark:type': 'Type' } })}`;
       L.polyline(latlngs, {
         color: cableColor,
         weight: type === 'cable_submarine' ? 2 : 1,
         opacity: 0.6,
         dashArray: type === 'cable_submarine' ? '6 4' : '4 3'
-      }).bindTooltip(name || 'Cable', { permanent: false, className: 'line-tooltip' }).addTo(map);
+      }).bindTooltip(name || 'Cable', { permanent: false, className: 'line-tooltip' })
+        .bindPopup(popupHtml, { offset: [0, -20], closeButton: false })
+        .addTo(map);
     }
   });
 }
@@ -806,11 +889,15 @@ if (etheraLine?.features?.length) {
   etheraLine.features.forEach(f => {
     if (f.geometry?.type === 'LineString') {
       const latlngs = f.geometry.coordinates.map(c => [c[1], c[0]]);
+      const p = f.properties ?? {};
+      const html = `<div class="pu-status" style="color:#00e87a">TRACK</div><div class="pu-name">Ethera vessel track</div>${formatPropsForPopup(p, { keyLabels: { point_count: 'Points', start: 'Start', end: 'End' } })}`;
       L.polyline(latlngs, {
         color: '#00e87a',
         weight: 3,
         opacity: 0.9
-      }).bindTooltip('Ethera track', { permanent: false, className: 'line-tooltip' }).addTo(map);
+      }).bindTooltip('Ethera track', { permanent: false, className: 'line-tooltip' })
+        .bindPopup(html, { offset: [0, -20], closeButton: false })
+        .addTo(map);
     }
   });
 }
@@ -821,25 +908,38 @@ if (etheraPoints?.features?.length) {
     const f = pts[i];
     if (f.geometry?.type === 'Point') {
       const [lng, lat] = f.geometry.coordinates;
-      L.circleMarker([lat, lng], { radius: 3, fillColor: '#00e87a', color: '#00e87a', weight: 1, fillOpacity: 0.7 }).addTo(map);
+      const p = f.properties ?? {};
+      const html = `<div class="pu-status" style="color:#00e87a">TRACK POINT</div><div class="pu-name">${lat.toFixed(5)}, ${lng.toFixed(5)}</div>${formatPropsForPopup(p, { keyLabels: { timestamp: 'Timestamp', datetime: 'DateTime' } })}`;
+      L.circleMarker([lat, lng], { radius: 3, fillColor: '#00e87a', color: '#00e87a', weight: 1, fillOpacity: 0.7 })
+        .bindPopup(html, { offset: [0, -8], closeButton: false })
+        .addTo(map);
     }
   }
 }
 
 // ── RENDER ETHERA INTERSECTION POINTS (cable/pipeline crossings) ─────────────────
+const centroidIds = etheraSites.filter(s => !s._aliasOf && !s._trackBounds).map(s => s.id);
 if (etheraIntersection?.features?.length) {
   const icon = L.divIcon({
     html: `<div class="site-icon c-red">${makeSvg('warn', 19)}</div>`,
     className: '', iconSize: [34, 34], iconAnchor: [17, 17]
   });
+  let centroidIdx = 0;
   etheraIntersection.features.forEach(f => {
     if (f.geometry?.type === 'Point' && f.properties?.['_role'] === 'intersection_centroid') {
+      const id = centroidIds[centroidIdx++];
       const [lng, lat] = f.geometry.coordinates;
       const p = f.properties;
       const name = p.name || p.description || p['seamark:name'] || 'Cable crossing';
       const type = p['man_made'] === 'pipeline' ? 'Pipeline' : (p['seamark:type'] === 'cable_submarine' ? 'Submarine cable' : 'Infrastructure');
+      const html = `<div class="pu-status" style="color:#ff3b3b">CROSSING</div><div class="pu-name">${esc(name)}</div><div class="pu-desc">${esc(type)} — Ethera track intersection</div>${formatPropsForPopup(p, { keyLabels: { _timestamp: 'Time', _nearestDistKm: 'Distance (km)', _hitCount: 'Hits', _hitIndex: 'Hit index', _featureIndex: 'Feature index', _featureType: 'Geometry type', _role: 'Role' } })}`;
       const m = L.marker([lat, lng], { icon }).addTo(map);
-      m.bindPopup(`<div class="pu-status" style="color:#ff3b3b">CROSSING</div><div class="pu-name">${name}</div><div class="pu-desc">${type} — Ethera track intersection</div>`, { offset: [0, -20], closeButton: false });
+      m.bindPopup(html, { offset: [0, -20], closeButton: false });
+      if (id) {
+        markers[id] = m;
+        m.on('click', () => activate(id, 'marker'));
+      }
+      if (id === firstCrossingId) markers['cable-crossings'] = m;
     }
   });
 }
@@ -872,6 +972,7 @@ document.querySelectorAll('.kw').forEach(el => {
 });
 
 SITES.forEach(s => {
+  if (markers[s.id]) return; // already created (e.g. intersection markers, cable-crossings alias)
   const icon = L.divIcon({
     html: `<div class="site-icon ${s.cls}">${makeSvg(s.icon, 19)}</div>`,
     className: '', iconSize:[34,34], iconAnchor:[17,17]

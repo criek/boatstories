@@ -17,8 +17,8 @@ Outputs (per scenario in synthetic_output/<scenario>/):
   - synthetic_summary.json Score breakdown
 
 Usage:
-  python synthetic_data_engine.py loitering -o synthetic_output
-  python synthetic_data_engine.py --all -o synthetic_output
+  python synthetic_data_engine.py loitering   # Regenerate alert data + track (writes to ethera/)
+  python synthetic_data_engine.py --all      # Run all scenarios (last one wins)
 """
 
 import json
@@ -351,20 +351,46 @@ SCENARIOS = {
 }
 
 
+def _unix_ts(t):
+    """Unix timestamp from datetime."""
+    return int(t.timestamp()) if hasattr(t, "timestamp") else 0
+
+
 def to_ethera_formats(points, scenario_name, label):
     """Output in data/ethera/ format for frontend."""
     coords = [[p["lon"], p["lat"]] for p in points]
+    first_ts = points[0]["timestamp"] if points else None
+    last_ts = points[-1]["timestamp"] if points else None
     line_geojson = {
         "type": "FeatureCollection",
-        "features": [{"type": "Feature", "geometry": {"type": "LineString", "coordinates": coords}, "properties": {"scenario": scenario_name, "label": label}}]
+        "features": [{
+            "type": "Feature",
+            "geometry": {"type": "LineString", "coordinates": coords},
+            "properties": {
+                "scenario": scenario_name,
+                "label": label,
+                "point_count": len(points),
+                "start": _ts_str(first_ts) if first_ts else None,
+                "end": _ts_str(last_ts) if last_ts else None,
+            }
+        }]
     }
     points_geojson = {
         "type": "FeatureCollection",
         "features": [
-            {"type": "Feature", "geometry": {"type": "Point", "coordinates": [p["lon"], p["lat"]]}, "properties": {
-                "speed": p.get("speed_knots"), "heading": p.get("cog"), "timestamp": _ts_str(p["timestamp"]),
-                "score": p.get("score", 0), "alert_level": p.get("alert_level", ""), "reasons": p.get("score_reasons", []),
-            }}
+            {
+                "type": "Feature",
+                "geometry": {"type": "Point", "coordinates": [p["lon"], p["lat"]]},
+                "properties": {
+                    "timestamp": _unix_ts(p["timestamp"]),
+                    "datetime": _ts_str(p["timestamp"]),
+                    "speed": p.get("speed_knots"),
+                    "heading": p.get("cog"),
+                    "score": p.get("score", 0),
+                    "alert_level": p.get("alert_level", ""),
+                    "reasons": p.get("score_reasons", []),
+                }
+            }
             for p in points
         ]
     }
@@ -414,13 +440,17 @@ def run_scenario(name, output_dir=None):
         "high_score_points": [{"lat": p["lat"], "lon": p["lon"], "score": p["score"], "reasons": p.get("score_reasons", []), "alert_level": p.get("alert_level", "")} for p in points if p["score"] >= 3],
     }
 
-    # Output to data/ethera/ and output/data/ethera/
+    # Output to data/ethera/, output/data/ethera/, and ethera/ (for frontend)
+    line_geo, points_geo = to_ethera_formats(points, name, label)
     for base in [Path("data/ethera"), Path("output/data/ethera")]:
         base.mkdir(parents=True, exist_ok=True)
-        line_geo, points_geo = to_ethera_formats(points, name, label)
         (base / "ethera.line.geojson").write_text(json.dumps(line_geo, indent=2))
         (base / "ethera.points.geojson").write_text(json.dumps(points_geo, indent=2))
         (base / "ethera-alerts.json").write_text(json.dumps(alerts, indent=2))
+
+    # Write ethera-alerts.json to ethera/ (track/points come from pipeline, don't overwrite)
+    Path("ethera").mkdir(parents=True, exist_ok=True)
+    (Path("ethera") / "ethera-alerts.json").write_text(json.dumps(alerts, indent=2))
 
     # Also write mst-compatible and track.geojson to data/ethera
     data_ethera = Path("data/ethera")
@@ -428,7 +458,7 @@ def run_scenario(name, output_dir=None):
     (data_ethera / "details_normalized.json").write_text(json.dumps(to_mst_details(points), indent=2))
     (data_ethera / "track.geojson").write_text(json.dumps(to_geojson_track(points, {"scenario": name, "label": label}), indent=2))
 
-    print(f"  Wrote to data/ethera/ and output/data/ethera/")
+    print(f"  Wrote to data/ethera/, output/data/ethera/, and ethera/ethera-alerts.json")
 
 
 def main():

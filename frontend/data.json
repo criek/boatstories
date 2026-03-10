@@ -3,24 +3,25 @@
   "reference": "REF-ETH-2026",
   "eventCount": 0,
   "dataSources": {
-    "infrastructure": "data/openstreetmapdata-export.geojson",
-    "etheraLine": "data/ethera/ethera.line.geojson",
-    "etheraPoints": "data/ethera/ethera.points.geojson",
-    "etheraIntersection": "data/ethera/ethera-intersection.geojson",
-    "etheraAlerts": "data/ethera/ethera-alerts.json"
+    "infrastructure": "/data/openstreetmapdata-export.geojson",
+    "etheraLine": "/ethera/ethera.data.line.geojson",
+    "etheraPoints": "/ethera/ethera.data.points.geojson",
+    "etheraIntersection": "/ethera/ethera.data-intersection.geojson",
+    "etheraAlerts": "/ethera/ethera-alerts.json"
   },
   "report": {
     "sections": [
       {
-        "title": "// voyage summary",
+        "title": "// risk assessment",
         "paragraphs": [
-          "Ethera vessel track overlaid on critical infrastructure (pipelines, submarine cables, wind farms) in the Belgian/Dutch coastal zone. Data from OpenStreetMap and Ethera."
+          "Estimated risk assessment: ~80–85% elevated risk. The vessel [energy-progress] (IMO 9387279) is a 2008-built medium-range product/chemical tanker (~46,600 DWT; 183 m × 32 m; service speed ~14–15 kn) whose risk profile is significantly increased due to identity manipulation indicators, including a change of MMSI and operation under a false Guinea flag, both commonly linked to sanctions-evasion practices used by parts of the Russian shadow tanker fleet.",
+          "Although factors such as age (~17 years), reflagging history, and ownership transfers can occur in normal tanker markets, the combination of a fraudulent flag, AIS identity changes, and transit through the busy North Sea–English Channel [track] with multiple subsea [cable-crossings] would likely trigger high-priority monitoring by maritime security and coast-watch authorities."
         ]
       },
       {
-        "title": "// layers",
+        "title": "// map & data reference",
         "paragraphs": [
-          "Infrastructure: wind farms, restricted areas, anchorages, submarine cables. Ship track: Ethera GPS positions."
+          "<span id=\"data-ref\"></span>See [track] and [cable-crossings] on map. Click the track (green line) for voyage summary. Click track points for timestamps. Red markers show cable/pipeline crossings — click for details. See Alerts tab for scored points."
         ]
       }
     ]
