@@ -6,7 +6,8 @@
     "infrastructure": "data/openstreetmapdata-export.geojson",
     "etheraLine": "data/ethera/ethera.line.geojson",
     "etheraPoints": "data/ethera/ethera.points.geojson",
-    "etheraIntersection": "data/ethera/ethera-intersection.geojson"
+    "etheraIntersection": "data/ethera/ethera-intersection.geojson",
+    "etheraAlerts": "data/ethera/ethera-alerts.json"
   },
   "report": {
     "sections": [

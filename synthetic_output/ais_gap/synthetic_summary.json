@@ -1,0 +1,9 @@
+{
+  "scenario": "ais_gap",
+  "label": "AIS silence near cable",
+  "n_points": 50,
+  "total_score": 0,
+  "max_point_score": 0,
+  "alert_points": 0,
+  "score_breakdown": {}
+}

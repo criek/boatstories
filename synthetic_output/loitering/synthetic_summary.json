@@ -1,0 +1,11 @@
+{
+  "scenario": "loitering",
+  "label": "Slow loitering near cable",
+  "n_points": 60,
+  "total_score": 33,
+  "max_point_score": 3,
+  "alert_points": 11,
+  "score_breakdown": {
+    "inside_restricted_area": 11
+  }
+}

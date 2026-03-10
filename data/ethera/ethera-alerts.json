@@ -1,0 +1,41 @@
+{
+  "scenario": "ais_gap",
+  "label": "AIS silence near cable",
+  "summary": {
+    "n_points": 50,
+    "total_score": 8,
+    "max_point_score": 3,
+    "alert_points": 2
+  },
+  "score_breakdown": {
+    "inside_no_anchoring": 1,
+    "cable_crossing": 1,
+    "very_close_to_cable": 1
+  },
+  "alert_levels": {
+    "0-2": "Low concern / monitor",
+    "3-5": "Review",
+    "6-8": "Escalate",
+    "9-999": "High-priority alert"
+  },
+  "high_score_points": [
+    {
+      "lat": 51.40076,
+      "lon": 3.25103,
+      "score": 3,
+      "reasons": [
+        "very_close_to_cable"
+      ],
+      "alert_level": "Review"
+    },
+    {
+      "lat": 51.43975,
+      "lon": 3.28053,
+      "score": 3,
+      "reasons": [
+        "inside_no_anchoring"
+      ],
+      "alert_level": "Review"
+    }
+  ]
+}

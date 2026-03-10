@@ -1,0 +1,14 @@
+{
+  "scenario": "anchoring",
+  "label": "Anchoring near infrastructure",
+  "n_points": 40,
+  "total_score": 104,
+  "max_point_score": 10,
+  "alert_points": 14,
+  "score_breakdown": {
+    "anchoring_near_asset": 14,
+    "very_close_to_cable": 6,
+    "cable_crossing": 8,
+    "sustained_low_speed": 14
+  }
+}

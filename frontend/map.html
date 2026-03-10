@@ -164,6 +164,41 @@
     padding: 20px 0;
   }
 
+  .tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 18px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .tab {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+    padding: 10px 16px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+  .tab-pane { display: none; flex: 1; overflow-y: auto; padding: 20px 20px 36px; }
+  .tab-pane.active { display: block; }
+  .tab-pane::-webkit-scrollbar { width: 3px; }
+  .tab-pane::-webkit-scrollbar-thumb { background: var(--border-hi); }
+  .alert-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; margin-bottom: 6px;
+    background: rgba(26,42,58,0.5); border: 1px solid var(--border);
+    font-family: 'Share Tech Mono', monospace; font-size: 0.7rem;
+  }
+  .alert-row.score-high { border-left: 3px solid var(--red); }
+  .alert-row.score-mid { border-left: 3px solid var(--amber); }
+  .alert-score { color: var(--cyan); font-weight: 600; min-width: 24px; }
+  .alert-reasons { color: var(--text-dim); font-size: 0.62rem; }
+
   .sec {
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.56rem;
@@ -341,6 +376,12 @@
       <span class="panel-bar-nodes" id="panel-events">[ 0 EVENTS ]</span>
     </div>
 
+    <div class="tabs">
+      <div class="tab active" data-tab="vessel">VESSEL</div>
+      <div class="tab" data-tab="alerts">ALERTS</div>
+    </div>
+
+    <div class="tab-pane active" id="pane-vessel">
     <div class="scroll-body" id="report-body">
       <div class="loading-msg" id="loading-msg">Loading data…</div>
 
@@ -361,6 +402,11 @@
       </div>
 
     </div>
+    </div>
+
+    <div class="tab-pane" id="pane-alerts">
+      <div id="alerts-content"></div>
+    </div>
   </div>
 
   <!-- MAP PANEL -->
@@ -371,7 +417,7 @@
 </div>
 
 <!-- Embedded config fallback (used when fetch fails, e.g. file://) -->
-<script type="application/json" id="config-fallback">{"title":"Ethera — Vessel Transit","reference":"REF-ETH-2026","eventCount":0,"dataSources":{"infrastructure":"data/openstreetmapdata-export.geojson","etheraLine":"data/ethera/ethera.line.geojson","etheraPoints":"data/ethera/ethera.points.geojson","etheraIntersection":"data/ethera/ethera-intersection.geojson"},"report":{"sections":[{"title":"// voyage summary","paragraphs":["Ethera vessel track overlaid on critical infrastructure. Serve via HTTP for full data."]}]},"geojson":null}</script>
+<script type="application/json" id="config-fallback">{"title":"Ethera — Vessel Transit","reference":"REF-ETH-2026","eventCount":0,"dataSources":{"infrastructure":"data/openstreetmapdata-export.geojson","etheraLine":"data/ethera/ethera.line.geojson","etheraPoints":"data/ethera/ethera.points.geojson","etheraIntersection":"data/ethera/ethera-intersection.geojson","etheraAlerts":"data/ethera/ethera-alerts.json"},"report":{"sections":[{"title":"// voyage summary","paragraphs":["Ethera vessel track overlaid on critical infrastructure. Run: python synthetic_data_engine.py loitering"]}]},"geojson":null}</script>
 
 <!-- Connector SVG overlay -->
 <svg id="conn-svg" xmlns="http://www.w3.org/2000/svg">
@@ -502,15 +548,16 @@ async function init() {
        : JSON.parse(DEMO_GEOJSON));
 
   // Fetch additional layers from dataSources
-  let infrastructure = null, etheraLine = null, etheraPoints = null, etheraIntersection = null;
+  let infrastructure = null, etheraLine = null, etheraPoints = null, etheraIntersection = null, etheraAlerts = null;
   const ds = config?.dataSources ?? {};
   const base = new URL('.', location.href).href;
   const fetchOpt = (path) => path ? fetch(new URL(path, base)).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null);
-  [infrastructure, etheraLine, etheraPoints, etheraIntersection] = await Promise.all([
+  [infrastructure, etheraLine, etheraPoints, etheraIntersection, etheraAlerts] = await Promise.all([
     fetchOpt(ds.infrastructure),
     fetchOpt(ds.etheraLine),
     fetchOpt(ds.etheraPoints),
-    fetchOpt(ds.etheraIntersection)
+    fetchOpt(ds.etheraIntersection),
+    fetchOpt(ds.etheraAlerts)
   ]);
 
   // Apply config to header/panel
@@ -533,6 +580,32 @@ async function init() {
     loadingMsg.style.display = 'block';
   }
   legend.style.display = 'block';
+
+  // Tab switching
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById('pane-' + t.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Render alerts tab
+  const alertsEl = document.getElementById('alerts-content');
+  if (etheraAlerts) {
+    const s = etheraAlerts.summary || {};
+    const level = s.max_point_score >= 9 ? 'High-priority' : s.max_point_score >= 6 ? 'Escalate' : s.max_point_score >= 3 ? 'Review' : 'Low';
+    alertsEl.innerHTML = `<div class="sec">// alert scoring</div>
+      <p><strong>Scenario</strong> ${etheraAlerts.label || '—'} · <strong>Total score</strong> ${s.total_score ?? 0} · <strong>Max point</strong> ${s.max_point_score ?? 0}</p>
+      <p><strong>Level</strong> ${level} · <strong>Alert points</strong> ${s.alert_points ?? 0}</p>
+      <div class="sec" style="margin-top:16px">// score breakdown</div>
+      ${Object.entries(etheraAlerts.score_breakdown || {}).map(([r, c]) => `<div class="alert-row"><span class="alert-score">${c}×</span><span class="alert-reasons">${r}</span></div>`).join('')}
+      <div class="sec" style="margin-top:16px">// high-score points</div>
+      ${(etheraAlerts.high_score_points || []).slice(0, 15).map(p => `<div class="alert-row score-${p.score >= 6 ? 'high' : 'mid'}"><span class="alert-score">${p.score}</span><span>${p.lat?.toFixed(4)}, ${p.lon?.toFixed(4)}</span><span class="alert-reasons">${(p.reasons || []).join(', ')}</span></div>`).join('')}`;
+  } else {
+    alertsEl.innerHTML = '<p class="loading-msg">No alert data. Run: python synthetic_data_engine.py loitering</p>';
+  }
 
   runMap(geoData, { infrastructure, etheraLine, etheraPoints, etheraIntersection });
 }

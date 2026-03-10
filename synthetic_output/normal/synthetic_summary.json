@@ -1,0 +1,13 @@
+{
+  "scenario": "normal",
+  "label": "Normal transit",
+  "n_points": 80,
+  "total_score": 32,
+  "max_point_score": 5,
+  "alert_points": 8,
+  "score_breakdown": {
+    "very_close_to_cable": 4,
+    "cable_crossing": 4,
+    "inside_restricted_area": 4
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "requested_id": "999999001",
+  "requested_id_field": "mmsi",
+  "lat": 51.47843,
+  "lon": 3.29895,
+  "speed_knots": 6.125979865921965,
+  "current_timestamp": "2026-03-10T13:40:45.001032Z",
+  "details_flat": {
+    "follow_info": {
+      "dest_txt": "Synthetic track",
+      "dest": "Test"
+    }
+  }
+}

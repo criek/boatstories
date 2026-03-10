@@ -210,7 +210,42 @@
       },
       "properties": {
         "scenario": "ais_gap",
-        "label": "AIS silence near cable"
+        "label": "AIS silence near cable",
+        "max_score": 3
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.25103,
+          51.40076
+        ]
+      },
+      "properties": {
+        "score": 3,
+        "alert_level": "Review",
+        "reasons": [
+          "very_close_to_cable"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.28053,
+          51.43975
+        ]
+      },
+      "properties": {
+        "score": 3,
+        "alert_level": "Review",
+        "reasons": [
+          "inside_no_anchoring"
+        ]
       }
     }
   ]

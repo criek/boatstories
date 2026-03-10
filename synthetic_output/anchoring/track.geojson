@@ -1,0 +1,442 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            3.22877,
+            51.45982
+          ],
+          [
+            3.23088,
+            51.46362
+          ],
+          [
+            3.23066,
+            51.46288
+          ],
+          [
+            3.23112,
+            51.46277
+          ],
+          [
+            3.22892,
+            51.46623
+          ],
+          [
+            3.23121,
+            51.46504
+          ],
+          [
+            3.22847,
+            51.46385
+          ],
+          [
+            3.22782,
+            51.46553
+          ],
+          [
+            3.22875,
+            51.46478
+          ],
+          [
+            3.22916,
+            51.46745
+          ],
+          [
+            3.23068,
+            51.46577
+          ],
+          [
+            3.23015,
+            51.46753
+          ],
+          [
+            3.22705,
+            51.4639
+          ],
+          [
+            3.23008,
+            51.4644
+          ],
+          [
+            3.22776,
+            51.46834
+          ],
+          [
+            3.22832,
+            51.46094
+          ],
+          [
+            3.23225,
+            51.46599
+          ],
+          [
+            3.22787,
+            51.46486
+          ],
+          [
+            3.22827,
+            51.46411
+          ],
+          [
+            3.22775,
+            51.46156
+          ],
+          [
+            3.23331,
+            51.46689
+          ],
+          [
+            3.22888,
+            51.46315
+          ],
+          [
+            3.23299,
+            51.46255
+          ],
+          [
+            3.23023,
+            51.46626
+          ],
+          [
+            3.23235,
+            51.46246
+          ],
+          [
+            3.23195,
+            51.46807
+          ],
+          [
+            3.22684,
+            51.46357
+          ],
+          [
+            3.23059,
+            51.46514
+          ],
+          [
+            3.2312,
+            51.46598
+          ],
+          [
+            3.22835,
+            51.46704
+          ],
+          [
+            3.23041,
+            51.46144
+          ],
+          [
+            3.23225,
+            51.46829
+          ],
+          [
+            3.23001,
+            51.46475
+          ],
+          [
+            3.23159,
+            51.46658
+          ],
+          [
+            3.2263,
+            51.46746
+          ],
+          [
+            3.22976,
+            51.46296
+          ],
+          [
+            3.22929,
+            51.46418
+          ],
+          [
+            3.2317,
+            51.46385
+          ],
+          [
+            3.23127,
+            51.46419
+          ],
+          [
+            3.23143,
+            51.4649
+          ]
+        ]
+      },
+      "properties": {
+        "scenario": "anchoring",
+        "label": "Anchoring near infrastructure",
+        "max_score": 10
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.22877,
+          51.45982
+        ]
+      },
+      "properties": {
+        "score": 5,
+        "alert_level": "Review",
+        "reasons": [
+          "anchoring_near_asset",
+          "sustained_low_speed"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.22847,
+          51.46385
+        ]
+      },
+      "properties": {
+        "score": 10,
+        "alert_level": "High-priority alert",
+        "reasons": [
+          "very_close_to_cable",
+          "anchoring_near_asset",
+          "sustained_low_speed",
+          "cable_crossing"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.22782,
+          51.46553
+        ]
+      },
+      "properties": {
+        "score": 8,
+        "alert_level": "Escalate",
+        "reasons": [
+          "very_close_to_cable",
+          "anchoring_near_asset",
+          "sustained_low_speed"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.22875,
+          51.46478
+        ]
+      },
+      "properties": {
+        "score": 7,
+        "alert_level": "Escalate",
+        "reasons": [
+          "anchoring_near_asset",
+          "sustained_low_speed",
+          "cable_crossing"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.22705,
+          51.4639
+        ]
+      },
+      "properties": {
+        "score": 5,
+        "alert_level": "Review",
+        "reasons": [
+          "anchoring_near_asset",
+          "sustained_low_speed"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.22832,
+          51.46094
+        ]
+      },
+      "properties": {
+        "score": 5,
+        "alert_level": "Review",
+        "reasons": [
+          "anchoring_near_asset",
+          "sustained_low_speed"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.22787,
+          51.46486
+        ]
+      },
+      "properties": {
+        "score": 10,
+        "alert_level": "High-priority alert",
+        "reasons": [
+          "very_close_to_cable",
+          "anchoring_near_asset",
+          "sustained_low_speed",
+          "cable_crossing"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.22827,
+          51.46411
+        ]
+      },
+      "properties": {
+        "score": 8,
+        "alert_level": "Escalate",
+        "reasons": [
+          "very_close_to_cable",
+          "anchoring_near_asset",
+          "sustained_low_speed"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.22888,
+          51.46315
+        ]
+      },
+      "properties": {
+        "score": 10,
+        "alert_level": "High-priority alert",
+        "reasons": [
+          "very_close_to_cable",
+          "anchoring_near_asset",
+          "sustained_low_speed",
+          "cable_crossing"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.22684,
+          51.46357
+        ]
+      },
+      "properties": {
+        "score": 5,
+        "alert_level": "Review",
+        "reasons": [
+          "anchoring_near_asset",
+          "sustained_low_speed"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.23041,
+          51.46144
+        ]
+      },
+      "properties": {
+        "score": 5,
+        "alert_level": "Review",
+        "reasons": [
+          "anchoring_near_asset",
+          "sustained_low_speed"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.2263,
+          51.46746
+        ]
+      },
+      "properties": {
+        "score": 10,
+        "alert_level": "High-priority alert",
+        "reasons": [
+          "very_close_to_cable",
+          "anchoring_near_asset",
+          "sustained_low_speed",
+          "cable_crossing"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.22976,
+          51.46296
+        ]
+      },
+      "properties": {
+        "score": 7,
+        "alert_level": "Escalate",
+        "reasons": [
+          "anchoring_near_asset",
+          "sustained_low_speed",
+          "cable_crossing"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.22929,
+          51.46418
+        ]
+      },
+      "properties": {
+        "score": 5,
+        "alert_level": "Review",
+        "reasons": [
+          "anchoring_near_asset",
+          "sustained_low_speed"
+        ]
+      }
+    }
+  ]
+}

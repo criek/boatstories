@@ -1,0 +1,445 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            3.26679,
+            51.43187
+          ],
+          [
+            3.26947,
+            51.42303
+          ],
+          [
+            3.26709,
+            51.43356
+          ],
+          [
+            3.26568,
+            51.44078
+          ],
+          [
+            3.264,
+            51.43472
+          ],
+          [
+            3.26619,
+            51.43855
+          ],
+          [
+            3.26657,
+            51.43769
+          ],
+          [
+            3.25998,
+            51.43554
+          ],
+          [
+            3.26023,
+            51.43879
+          ],
+          [
+            3.2548,
+            51.43757
+          ],
+          [
+            3.25291,
+            51.43483
+          ],
+          [
+            3.25438,
+            51.4382
+          ],
+          [
+            3.25444,
+            51.43407
+          ],
+          [
+            3.25283,
+            51.43447
+          ],
+          [
+            3.25358,
+            51.43225
+          ],
+          [
+            3.25232,
+            51.43093
+          ],
+          [
+            3.25436,
+            51.42705
+          ],
+          [
+            3.25191,
+            51.42776
+          ],
+          [
+            3.25159,
+            51.42595
+          ],
+          [
+            3.25651,
+            51.42344
+          ],
+          [
+            3.25551,
+            51.42184
+          ],
+          [
+            3.26077,
+            51.42012
+          ],
+          [
+            3.26173,
+            51.42006
+          ],
+          [
+            3.26167,
+            51.42109
+          ],
+          [
+            3.26367,
+            51.42316
+          ],
+          [
+            3.26664,
+            51.4261
+          ],
+          [
+            3.26413,
+            51.42727
+          ],
+          [
+            3.26307,
+            51.4269
+          ],
+          [
+            3.26335,
+            51.42684
+          ],
+          [
+            3.26696,
+            51.43271
+          ],
+          [
+            3.26843,
+            51.42852
+          ],
+          [
+            3.26813,
+            51.43325
+          ],
+          [
+            3.26575,
+            51.43401
+          ],
+          [
+            3.26169,
+            51.43626
+          ],
+          [
+            3.26795,
+            51.43781
+          ],
+          [
+            3.26509,
+            51.43822
+          ],
+          [
+            3.25663,
+            51.43912
+          ],
+          [
+            3.26133,
+            51.4344
+          ],
+          [
+            3.25441,
+            51.43639
+          ],
+          [
+            3.26176,
+            51.43656
+          ],
+          [
+            3.25771,
+            51.4342
+          ],
+          [
+            3.25719,
+            51.43497
+          ],
+          [
+            3.25255,
+            51.43376
+          ],
+          [
+            3.25072,
+            51.43257
+          ],
+          [
+            3.2506,
+            51.43308
+          ],
+          [
+            3.25182,
+            51.43412
+          ],
+          [
+            3.25677,
+            51.42467
+          ],
+          [
+            3.25538,
+            51.42079
+          ],
+          [
+            3.2547,
+            51.42627
+          ],
+          [
+            3.25517,
+            51.42294
+          ],
+          [
+            3.25151,
+            51.42267
+          ],
+          [
+            3.2537,
+            51.42163
+          ],
+          [
+            3.25982,
+            51.42014
+          ],
+          [
+            3.26242,
+            51.42022
+          ],
+          [
+            3.26244,
+            51.42538
+          ],
+          [
+            3.26734,
+            51.42682
+          ],
+          [
+            3.26408,
+            51.42567
+          ],
+          [
+            3.26577,
+            51.42556
+          ],
+          [
+            3.26939,
+            51.42785
+          ],
+          [
+            3.26891,
+            51.42557
+          ]
+        ]
+      },
+      "properties": {
+        "scenario": "loitering",
+        "label": "Slow loitering near cable",
+        "max_score": 3
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.25159,
+          51.42595
+        ]
+      },
+      "properties": {
+        "score": 3,
+        "alert_level": "Review",
+        "reasons": [
+          "inside_restricted_area"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.25651,
+          51.42344
+        ]
+      },
+      "properties": {
+        "score": 3,
+        "alert_level": "Review",
+        "reasons": [
+          "inside_restricted_area"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.25551,
+          51.42184
+        ]
+      },
+      "properties": {
+        "score": 3,
+        "alert_level": "Review",
+        "reasons": [
+          "inside_restricted_area"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.26077,
+          51.42012
+        ]
+      },
+      "properties": {
+        "score": 3,
+        "alert_level": "Review",
+        "reasons": [
+          "inside_restricted_area"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.25677,
+          51.42467
+        ]
+      },
+      "properties": {
+        "score": 3,
+        "alert_level": "Review",
+        "reasons": [
+          "inside_restricted_area"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.25538,
+          51.42079
+        ]
+      },
+      "properties": {
+        "score": 3,
+        "alert_level": "Review",
+        "reasons": [
+          "inside_restricted_area"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.2547,
+          51.42627
+        ]
+      },
+      "properties": {
+        "score": 3,
+        "alert_level": "Review",
+        "reasons": [
+          "inside_restricted_area"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.25517,
+          51.42294
+        ]
+      },
+      "properties": {
+        "score": 3,
+        "alert_level": "Review",
+        "reasons": [
+          "inside_restricted_area"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.25151,
+          51.42267
+        ]
+      },
+      "properties": {
+        "score": 3,
+        "alert_level": "Review",
+        "reasons": [
+          "inside_restricted_area"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.2537,
+          51.42163
+        ]
+      },
+      "properties": {
+        "score": 3,
+        "alert_level": "Review",
+        "reasons": [
+          "inside_restricted_area"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.25982,
+          51.42014
+        ]
+      },
+      "properties": {
+        "score": 3,
+        "alert_level": "Review",
+        "reasons": [
+          "inside_restricted_area"
+        ]
+      }
+    }
+  ]
+}

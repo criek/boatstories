@@ -1,0 +1,9 @@
+{
+  "scenario": "crossings",
+  "label": "Repeated cable crossings",
+  "n_points": 100,
+  "total_score": 0,
+  "max_point_score": 0,
+  "alert_points": 0,
+  "score_breakdown": {}
+}

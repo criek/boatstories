@@ -1,0 +1,505 @@
+{
+  "raw_format_guess": "synthetic",
+  "points": [
+    {
+      "line_index": 1,
+      "lat": 51.40076,
+      "lon": 3.25103,
+      "timestamp": "2026-03-10T11:11:28.258920Z",
+      "speed_knots_guess": 5.594242921490344,
+      "course_deg_guess": 50,
+      "score": 3,
+      "alert_level": "Review"
+    },
+    {
+      "line_index": 2,
+      "lat": 51.40377,
+      "lon": 3.25116,
+      "timestamp": "2026-03-10T11:13:28.258920Z",
+      "speed_knots_guess": 5.706482798440974,
+      "course_deg_guess": 50,
+      "score": 2,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 3,
+      "lat": 51.40828,
+      "lon": 3.25652,
+      "timestamp": "2026-03-10T11:15:28.258920Z",
+      "speed_knots_guess": 5.141068621972607,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 4,
+      "lat": 51.41175,
+      "lon": 3.25875,
+      "timestamp": "2026-03-10T11:17:28.258920Z",
+      "speed_knots_guess": 6.44726875773602,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 5,
+      "lat": 51.41562,
+      "lon": 3.26118,
+      "timestamp": "2026-03-10T11:19:28.258920Z",
+      "speed_knots_guess": 6.185013472705647,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 6,
+      "lat": 51.41912,
+      "lon": 3.26521,
+      "timestamp": "2026-03-10T11:21:28.258920Z",
+      "speed_knots_guess": 5.693367918305559,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 7,
+      "lat": 51.42496,
+      "lon": 3.26845,
+      "timestamp": "2026-03-10T11:23:28.258920Z",
+      "speed_knots_guess": 5.757339366016684,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 8,
+      "lat": 51.42751,
+      "lon": 3.27088,
+      "timestamp": "2026-03-10T11:25:28.258920Z",
+      "speed_knots_guess": 5.550065055686123,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 9,
+      "lat": 51.43275,
+      "lon": 3.27482,
+      "timestamp": "2026-03-10T11:27:28.258920Z",
+      "speed_knots_guess": 6.472241955912398,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 10,
+      "lat": 51.4355,
+      "lon": 3.27712,
+      "timestamp": "2026-03-10T11:29:28.258920Z",
+      "speed_knots_guess": 5.916390747739302,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 11,
+      "lat": 51.43975,
+      "lon": 3.28053,
+      "timestamp": "2026-03-10T11:31:28.258920Z",
+      "speed_knots_guess": 5.8437917904822925,
+      "course_deg_guess": 50,
+      "score": 3,
+      "alert_level": "Review"
+    },
+    {
+      "line_index": 12,
+      "lat": 51.44423,
+      "lon": 3.28456,
+      "timestamp": "2026-03-10T11:33:28.258920Z",
+      "speed_knots_guess": 5.535335669982985,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 13,
+      "lat": 51.44946,
+      "lon": 3.28604,
+      "timestamp": "2026-03-10T11:35:28.258920Z",
+      "speed_knots_guess": 6.199764125047207,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 14,
+      "lat": 51.45179,
+      "lon": 3.28922,
+      "timestamp": "2026-03-10T11:37:28.258920Z",
+      "speed_knots_guess": 6.035352608101525,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 15,
+      "lat": 51.45578,
+      "lon": 3.29175,
+      "timestamp": "2026-03-10T11:39:28.258920Z",
+      "speed_knots_guess": 5.675568934495143,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 16,
+      "lat": 51.45921,
+      "lon": 3.29478,
+      "timestamp": "2026-03-10T11:41:28.258920Z",
+      "speed_knots_guess": 5.528280828803675,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 17,
+      "lat": 51.46306,
+      "lon": 3.29804,
+      "timestamp": "2026-03-10T11:43:28.258920Z",
+      "speed_knots_guess": 6.159825194315404,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 18,
+      "lat": 51.46753,
+      "lon": 3.29993,
+      "timestamp": "2026-03-10T11:45:28.258920Z",
+      "speed_knots_guess": 5.5929974053005225,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 19,
+      "lat": 51.47255,
+      "lon": 3.30353,
+      "timestamp": "2026-03-10T11:47:28.258920Z",
+      "speed_knots_guess": 5.86056072635233,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 20,
+      "lat": 51.47536,
+      "lon": 3.30664,
+      "timestamp": "2026-03-10T11:49:28.258920Z",
+      "speed_knots_guess": 6.360793806498338,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 21,
+      "lat": 51.47882,
+      "lon": 3.30937,
+      "timestamp": "2026-03-10T11:51:28.258920Z",
+      "speed_knots_guess": 6.1701770922811745,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 22,
+      "lat": 51.48417,
+      "lon": 3.31263,
+      "timestamp": "2026-03-10T11:53:28.258920Z",
+      "speed_knots_guess": 6.148993635322432,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 23,
+      "lat": 51.48712,
+      "lon": 3.31554,
+      "timestamp": "2026-03-10T11:55:28.258920Z",
+      "speed_knots_guess": 5.463897713530002,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 24,
+      "lat": 51.49203,
+      "lon": 3.31895,
+      "timestamp": "2026-03-10T11:57:28.258920Z",
+      "speed_knots_guess": 6.749035626656374,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 25,
+      "lat": 51.49569,
+      "lon": 3.32217,
+      "timestamp": "2026-03-10T11:59:28.258920Z",
+      "speed_knots_guess": 5.76858387391455,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 26,
+      "lat": 51.49928,
+      "lon": 3.32506,
+      "timestamp": "2026-03-10T12:44:28.258920Z",
+      "speed_knots_guess": 5.987120335808579,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 27,
+      "lat": 51.50308,
+      "lon": 3.3272,
+      "timestamp": "2026-03-10T12:46:28.258920Z",
+      "speed_knots_guess": 6.538176104063871,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 28,
+      "lat": 51.50832,
+      "lon": 3.3329,
+      "timestamp": "2026-03-10T12:48:28.258920Z",
+      "speed_knots_guess": 5.729573362105234,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 29,
+      "lat": 51.51066,
+      "lon": 3.3348,
+      "timestamp": "2026-03-10T12:50:28.258920Z",
+      "speed_knots_guess": 5.880138412086428,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 30,
+      "lat": 51.51668,
+      "lon": 3.33641,
+      "timestamp": "2026-03-10T12:52:28.258920Z",
+      "speed_knots_guess": 6.391952674080913,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 31,
+      "lat": 51.52132,
+      "lon": 3.34182,
+      "timestamp": "2026-03-10T12:54:28.258920Z",
+      "speed_knots_guess": 6.557580199040327,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 32,
+      "lat": 51.52478,
+      "lon": 3.34224,
+      "timestamp": "2026-03-10T12:56:28.258920Z",
+      "speed_knots_guess": 6.51983980027676,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 33,
+      "lat": 51.5269,
+      "lon": 3.34574,
+      "timestamp": "2026-03-10T12:58:28.258920Z",
+      "speed_knots_guess": 5.642158948935321,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 34,
+      "lat": 51.53189,
+      "lon": 3.35034,
+      "timestamp": "2026-03-10T13:00:28.258920Z",
+      "speed_knots_guess": 6.101688007452149,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 35,
+      "lat": 51.53628,
+      "lon": 3.34992,
+      "timestamp": "2026-03-10T13:02:28.258920Z",
+      "speed_knots_guess": 5.910850585353548,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 36,
+      "lat": 51.53949,
+      "lon": 3.35438,
+      "timestamp": "2026-03-10T13:04:28.258920Z",
+      "speed_knots_guess": 6.006702644589768,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 37,
+      "lat": 51.5444,
+      "lon": 3.35936,
+      "timestamp": "2026-03-10T13:06:28.258920Z",
+      "speed_knots_guess": 6.5453928119297515,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 38,
+      "lat": 51.547,
+      "lon": 3.36024,
+      "timestamp": "2026-03-10T13:08:28.258920Z",
+      "speed_knots_guess": 6.686266163918507,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 39,
+      "lat": 51.55097,
+      "lon": 3.36374,
+      "timestamp": "2026-03-10T13:10:28.258920Z",
+      "speed_knots_guess": 5.827913179795411,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 40,
+      "lat": 51.5542,
+      "lon": 3.36712,
+      "timestamp": "2026-03-10T13:12:28.258920Z",
+      "speed_knots_guess": 5.966006401697994,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 41,
+      "lat": 51.55945,
+      "lon": 3.37143,
+      "timestamp": "2026-03-10T13:14:28.258920Z",
+      "speed_knots_guess": 7.018796290539154,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 42,
+      "lat": 51.56318,
+      "lon": 3.37177,
+      "timestamp": "2026-03-10T13:16:28.258920Z",
+      "speed_knots_guess": 6.124726828821753,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 43,
+      "lat": 51.56854,
+      "lon": 3.37679,
+      "timestamp": "2026-03-10T13:18:28.258920Z",
+      "speed_knots_guess": 5.902057599062496,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 44,
+      "lat": 51.57237,
+      "lon": 3.37804,
+      "timestamp": "2026-03-10T13:20:28.258920Z",
+      "speed_knots_guess": 5.910775717836563,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 45,
+      "lat": 51.57698,
+      "lon": 3.38032,
+      "timestamp": "2026-03-10T13:22:28.258920Z",
+      "speed_knots_guess": 6.2024622933523,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 46,
+      "lat": 51.57969,
+      "lon": 3.38666,
+      "timestamp": "2026-03-10T13:24:28.258920Z",
+      "speed_knots_guess": 5.3326438202639705,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 47,
+      "lat": 51.58359,
+      "lon": 3.3886,
+      "timestamp": "2026-03-10T13:26:28.258920Z",
+      "speed_knots_guess": 5.721972770330246,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 48,
+      "lat": 51.58694,
+      "lon": 3.39174,
+      "timestamp": "2026-03-10T13:28:28.258920Z",
+      "speed_knots_guess": 5.188746710540143,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 49,
+      "lat": 51.59359,
+      "lon": 3.39428,
+      "timestamp": "2026-03-10T13:30:28.258920Z",
+      "speed_knots_guess": 6.43342648991691,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    },
+    {
+      "line_index": 50,
+      "lat": 51.59699,
+      "lon": 3.39647,
+      "timestamp": "2026-03-10T13:32:28.258920Z",
+      "speed_knots_guess": 6.050553566534479,
+      "course_deg_guess": 50,
+      "score": 0,
+      "alert_level": "Low concern / monitor"
+    }
+  ]
+}
