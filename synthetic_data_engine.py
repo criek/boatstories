@@ -19,6 +19,7 @@ Outputs (per scenario in synthetic_output/<scenario>/):
 Usage:
   python synthetic_data_engine.py loitering   # Regenerate alert data + track (writes to ethera/)
   python synthetic_data_engine.py --all      # Run all scenarios (last one wins)
+  python synthetic_data_engine.py --analyze  # Generate alerts from real ethera + OSM data (recommended)
 """
 
 import json
@@ -26,6 +27,33 @@ import math
 import random
 from datetime import datetime, timedelta
 from pathlib import Path
+
+try:
+    from shapely.geometry import Point as ShapelyPoint, Polygon, LineString
+    from shapely.ops import nearest_points
+    SHAPELY_AVAILABLE = True
+except ImportError:
+    SHAPELY_AVAILABLE = False
+
+
+def _point_in_polygon_raycast(x, y, ring):
+    """Ray casting: point (x,y) inside polygon ring? Ring is list of [lon, lat]."""
+    n = len(ring)
+    if n < 3:
+        return False
+    inside = False
+    p1x, p1y = ring[0][0], ring[0][1]
+    for i in range(1, n + 1):
+        p2x, p2y = ring[i % n][0], ring[i % n][1]
+        if p1y == p2y:
+            p1x, p1y = p2x, p2y
+            continue
+        if y > min(p1y, p2y) and y <= max(p1y, p2y) and x <= max(p1x, p2x):
+            xints = (y - p1y) * (p2x - p1x) / (p2y - p1y) + p1x
+            if p1x == p2x or x <= xints:
+                inside = not inside
+        p1x, p1y = p2x, p2y
+    return inside
 
 # ── SCORING RULES (from watchfloor checklist) ─────────────────────────────────
 SCORE_RULES = {
@@ -461,13 +489,300 @@ def run_scenario(name, output_dir=None):
     print(f"  Wrote to data/ethera/, output/data/ethera/, and ethera/ethera-alerts.json")
 
 
+# ── REAL-DATA ANALYSIS (ethera + OSM correlation) ───────────────────────────────
+
+ETHERA_DIR = Path("ethera")
+DATA_DIR = Path("data")
+OSM_PATH = DATA_DIR / "openstreetmapdata-export.geojson"
+
+# Distance thresholds (km)
+VERY_CLOSE_KM = 0.05
+NEAR_CABLE_KM = 0.15
+CABLE_CROSSING_MATCH_KM = 0.5
+TIMESTAMP_MATCH_SEC = 7200  # 2 hours - match track point to intersection by time
+AIS_GAP_MINUTES = 30
+LOW_SPEED_KNOTS = 2
+ANCHORING_SPEED_KNOTS = 0.5
+
+
+def _load_geojson(path):
+    """Load GeoJSON file."""
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _extract_intersection_centroids(geojson):
+    """Extract intersection centroids from ethera.data-intersection.geojson."""
+    centroids = []
+    for f in geojson.get("features", []):
+        if f.get("properties", {}).get("_role") != "intersection_centroid":
+            continue
+        geom = f.get("geometry")
+        if not geom or geom.get("type") != "Point":
+            continue
+        coords = geom["coordinates"]
+        props = f["properties"]
+        centroids.append({
+            "lon": coords[0],
+            "lat": coords[1],
+            "name": props.get("name", "unknown"),
+            "_timestamp": props.get("_timestamp"),
+            "_nearestDistKm": props.get("_nearestDistKm"),
+        })
+    return centroids
+
+
+def _get_polygon_rings(geom):
+    """Extract exterior rings from Polygon or MultiPolygon. Returns list of rings (each is list of [lon,lat])."""
+    if not geom:
+        return []
+    coords = geom.get("coordinates")
+    if not coords:
+        return []
+    if geom["type"] == "Polygon":
+        return [coords[0]] if coords else []
+    if geom["type"] == "MultiPolygon":
+        return [p[0] for p in coords if p]
+    return []
+
+
+def _extract_osm_zones(geojson):
+    """Extract restricted areas, anchorages, wind farms from OSM GeoJSON."""
+    restricted = []
+    anchorages = []
+    wind_farms = []
+    for f in geojson.get("features", []):
+        props = f.get("properties", {})
+        geom = f.get("geometry")
+        if not geom:
+            continue
+        stype = props.get("seamark:type", "")
+        restriction = props.get("seamark:restricted_area:restriction", "")
+        name = props.get("seamark:name", props.get("name", ""))
+        rings = _get_polygon_rings(geom)
+        if not rings:
+            continue
+        if stype == "restricted_area" or (stype == "production_area" and restriction == "no_entry"):
+            for ring in rings:
+                restricted.append({"ring": ring, "name": name})
+        elif stype == "anchorage":
+            for ring in rings:
+                anchorages.append({"ring": ring, "name": name})
+        elif stype == "production_area" and "wind" in str(props.get("seamark:production_area:category", "")).lower():
+            for ring in rings:
+                wind_farms.append({"ring": ring, "name": name})
+    return restricted, anchorages, wind_farms
+
+
+def _extract_osm_cables(geojson):
+    """Extract submarine cable LineStrings from OSM."""
+    cables = []
+    for f in geojson.get("features", []):
+        props = f.get("properties", {})
+        if props.get("seamark:type") != "cable_submarine":
+            continue
+        geom = f.get("geometry")
+        if not geom or geom.get("type") != "LineString":
+            continue
+        coords = geom["coordinates"]
+        cables.append({"coords": coords, "name": props.get("name", "cable")})
+    return cables
+
+
+def _point_in_any(lon, lat, zones):
+    """Check if point (lon, lat) is inside any zone. Zones have 'ring' (list of [lon,lat]) and 'name'."""
+    for z in zones:
+        if _point_in_polygon_raycast(lon, lat, z["ring"]):
+            return z.get("name", "")
+    return None
+
+
+def _estimate_speed_knots(lat1, lon1, ts1, lat2, lon2, ts2):
+    """Estimate speed in knots between two points (nautical miles per hour)."""
+    if not ts1 or not ts2 or ts2 == ts1:
+        return None
+    dist_km = haversine_km(lon1, lat1, lon2, lat2)
+    dist_nm = dist_km / 1.852
+    dt_hours = abs(ts2 - ts1) / 3600.0
+    if dt_hours <= 0:
+        return None
+    return dist_nm / dt_hours
+
+
+def run_real_data_analysis():
+    """Analyze real ethera track + intersections + OSM, output true alerts to ethera/ethera-alerts.json."""
+    points_path = ETHERA_DIR / "ethera.data.points.geojson"
+    intersection_path = ETHERA_DIR / "ethera.data-intersection.geojson"
+
+    if not points_path.exists():
+        print(f"Missing {points_path}")
+        return
+    if not intersection_path.exists():
+        print(f"Missing {intersection_path}")
+        return
+
+    points_geo = _load_geojson(points_path)
+    intersection_geo = _load_geojson(intersection_path)
+    centroids = _extract_intersection_centroids(intersection_geo)
+    print(f"Loaded {len(centroids)} intersection centroids from ethera.data-intersection.geojson")
+
+    restricted, anchorages, wind_farms = [], [], []
+    cables_osm = []
+    if OSM_PATH.exists():
+        osm_geo = _load_geojson(OSM_PATH)
+        restricted, anchorages, wind_farms = _extract_osm_zones(osm_geo)
+        cables_osm = _extract_osm_cables(osm_geo)
+        print(f"Loaded OSM: {len(restricted)} restricted, {len(anchorages)} anchorages, {len(wind_farms)} wind farms, {len(cables_osm)} cables")
+    else:
+        print(f"OSM file not found: {OSM_PATH}")
+
+    # Build track points (sorted by timestamp ascending for speed/gap computation)
+    track = []
+    for f in points_geo.get("features", []):
+        geom = f.get("geometry")
+        if not geom or geom.get("type") != "Point":
+            continue
+        coords = geom["coordinates"]
+        props = f.get("properties", {})
+        ts = props.get("timestamp")
+        track.append({
+            "lat": coords[1],
+            "lon": coords[0],
+            "timestamp": ts,
+            "datetime": props.get("datetime"),
+        })
+    track.sort(key=lambda p: p["timestamp"] or 0)
+    print(f"Loaded {len(track)} track points")
+
+    # Compute derived fields and scores for each point
+    prev = None
+    cable_cross_count = 0
+    for i, p in enumerate(track):
+        lon, lat = p["lon"], p["lat"]
+        ts = p["timestamp"]
+
+        # Distance to nearest intersection centroid (real cable crossing from ethera)
+        min_dist_centroid = 999.0
+        nearest_centroid = None
+        for c in centroids:
+            d = haversine_km(lon, lat, c["lon"], c["lat"])
+            if d < min_dist_centroid:
+                min_dist_centroid = d
+                nearest_centroid = c
+
+        # Also check distance to OSM cables (line segments)
+        min_dist_cable = min_dist_centroid
+        for cab in cables_osm:
+            for j in range(len(cab["coords"]) - 1):
+                x1, y1 = cab["coords"][j][0], cab["coords"][j][1]
+                x2, y2 = cab["coords"][j + 1][0], cab["coords"][j + 1][1]
+                d = point_to_line_dist_km(lon, lat, x1, y1, x2, y2)
+                min_dist_cable = min(min_dist_cable, d)
+
+        p["distance_to_cable_km"] = round(min(min_dist_centroid, min_dist_cable), 4)
+        p["very_close_to_cable"] = p["distance_to_cable_km"] < VERY_CLOSE_KM
+        p["near_cable"] = p["distance_to_cable_km"] < NEAR_CABLE_KM
+
+        # Match to intersection centroid by timestamp (crossing event)
+        p["cable_crossing"] = False
+        p["matched_centroid_name"] = None
+        if nearest_centroid and nearest_centroid.get("_timestamp") and ts:
+            ts_diff = abs(ts - nearest_centroid["_timestamp"])
+            if ts_diff < TIMESTAMP_MATCH_SEC and min_dist_centroid < CABLE_CROSSING_MATCH_KM:
+                p["cable_crossing"] = True
+                p["matched_centroid_name"] = nearest_centroid.get("name")
+
+        if p["cable_crossing"]:
+            cable_cross_count += 1
+
+        # OSM zones
+        p["inside_restricted_area"] = _point_in_any(lon, lat, restricted) is not None
+        p["inside_anchorage"] = _point_in_any(lon, lat, anchorages) is not None
+        p["inside_wind_farm"] = _point_in_any(lon, lat, wind_farms) is not None
+        p["inside_no_anchoring"] = p["inside_restricted_area"]
+
+        # Speed from consecutive points
+        speed = None
+        if prev and prev.get("timestamp") and ts:
+            speed = _estimate_speed_knots(prev["lat"], prev["lon"], prev["timestamp"], lat, lon, ts)
+        p["speed_knots"] = speed
+        p["sustained_low_speed"] = speed is not None and speed < LOW_SPEED_KNOTS and p["near_cable"]
+        p["anchoring_near_asset"] = speed is not None and speed < ANCHORING_SPEED_KNOTS and p["near_cable"]
+
+        # AIS gap
+        gap_mins = 0
+        if prev and prev.get("timestamp") and ts:
+            gap_mins = abs(ts - prev["timestamp"]) / 60.0
+        p["time_gap_minutes"] = gap_mins
+        p["ais_gap_near_asset"] = gap_mins > AIS_GAP_MINUTES and p["near_cable"]
+
+        p["large_cog_heading_mismatch"] = False
+
+        # Score
+        score, reasons = score_point(p, {"cable_cross_count": cable_cross_count})
+        p["score"] = score
+        p["score_reasons"] = reasons
+        for (lo, hi), level in ALERT_LEVELS.items():
+            if lo <= score <= hi:
+                p["alert_level"] = level
+                break
+        else:
+            p["alert_level"] = "Unknown"
+        prev = p
+
+    alert_points = [p for p in track if p["score"] >= 3]
+    total_score = sum(p["score"] for p in track)
+    max_score = max(p["score"] for p in track) if track else 0
+
+    print(f"Analysis: {len(track)} points, {len(alert_points)} alert points, max score {max_score}")
+
+    alerts = {
+        "scenario": "real_data",
+        "label": "Real-data analysis (ethera + OSM)",
+        "summary": {
+            "n_points": len(track),
+            "total_score": total_score,
+            "max_point_score": max_score,
+            "alert_points": len(alert_points),
+            "intersection_centroids": len(centroids),
+        },
+        "score_breakdown": {
+            r: sum(1 for p in track for r2 in p.get("score_reasons", []) if r2 == r)
+            for r in set().union(*(set(p.get("score_reasons", [])) for p in track))
+        },
+        "alert_levels": {f"{k[0]}-{k[1]}": v for k, v in ALERT_LEVELS.items()},
+        "high_score_points": [
+            {
+                "lat": p["lat"],
+                "lon": p["lon"],
+                "score": p["score"],
+                "reasons": p.get("score_reasons", []),
+                "alert_level": p.get("alert_level", ""),
+                "timestamp": p.get("timestamp"),
+                "datetime": p.get("datetime"),
+                "matched_cable": p.get("matched_centroid_name"),
+                "distance_to_cable_km": p.get("distance_to_cable_km"),
+            }
+            for p in alert_points
+        ],
+    }
+
+    Path("ethera").mkdir(parents=True, exist_ok=True)
+    (Path("ethera") / "ethera-alerts.json").write_text(json.dumps(alerts, indent=2))
+    print(f"  Wrote ethera/ethera-alerts.json ({len(alert_points)} high-score points)")
+
+
 def main():
     import argparse
     p = argparse.ArgumentParser(description="Generate synthetic AIS data for watchfloor testing. Outputs to data/ethera/ and output/data/ethera/.")
     p.add_argument("scenario", nargs="?", help="Scenario: " + ", ".join(SCENARIOS.keys()))
     p.add_argument("--all", action="store_true", help="Run all scenarios (last one wins)")
+    p.add_argument("--analyze", action="store_true", help="Generate alerts from real ethera + OSM data")
     args = p.parse_args()
 
+    if args.analyze:
+        run_real_data_analysis()
+        return
     if args.all:
         for name in SCENARIOS:
             run_scenario(name, None)

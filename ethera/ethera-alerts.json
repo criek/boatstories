@@ -1,16 +1,16 @@
 {
-  "scenario": "ais_gap",
-  "label": "AIS silence near cable",
+  "scenario": "real_data",
+  "label": "Real-data analysis (ethera + OSM)",
   "summary": {
-    "n_points": 50,
-    "total_score": 10,
+    "n_points": 934,
+    "total_score": 277,
     "max_point_score": 5,
-    "alert_points": 2
+    "alert_points": 13,
+    "intersection_centroids": 26
   },
   "score_breakdown": {
-    "cable_crossing": 2,
-    "inside_no_anchoring": 1,
-    "very_close_to_cable": 1
+    "very_close_to_cable": 13,
+    "cable_crossing": 119
   },
   "alert_levels": {
     "0-2": "Low concern / monitor",
@@ -20,23 +20,186 @@
   },
   "high_score_points": [
     {
-      "lat": 51.40712,
-      "lon": 3.25753,
+      "lat": 51.16129,
+      "lon": 1.87901,
       "score": 5,
       "reasons": [
         "very_close_to_cable",
         "cable_crossing"
       ],
-      "alert_level": "Review"
+      "alert_level": "Review",
+      "timestamp": 1772310595,
+      "datetime": "2026-02-28T20:29:55+00:00",
+      "matched_cable": "UK-Belgium 6 - Seg 2",
+      "distance_to_cable_km": 0.0199
     },
     {
-      "lat": 51.44041,
-      "lon": 3.28003,
-      "score": 3,
+      "lat": 51.16158,
+      "lon": 1.87983,
+      "score": 5,
       "reasons": [
-        "inside_no_anchoring"
+        "very_close_to_cable",
+        "cable_crossing"
       ],
-      "alert_level": "Review"
+      "alert_level": "Review",
+      "timestamp": 1772310605,
+      "datetime": "2026-02-28T20:30:05+00:00",
+      "matched_cable": "UK-Belgium 6 - Seg 2",
+      "distance_to_cable_km": 0.0283
+    },
+    {
+      "lat": 51.16187,
+      "lon": 1.88081,
+      "score": 5,
+      "reasons": [
+        "very_close_to_cable",
+        "cable_crossing"
+      ],
+      "alert_level": "Review",
+      "timestamp": 1772310619,
+      "datetime": "2026-02-28T20:30:19+00:00",
+      "matched_cable": "UK-Belgium 6 - Seg 2",
+      "distance_to_cable_km": 0.0324
+    },
+    {
+      "lat": 51.33514,
+      "lon": 2.1204,
+      "score": 5,
+      "reasons": [
+        "very_close_to_cable",
+        "cable_crossing"
+      ],
+      "alert_level": "Review",
+      "timestamp": 1772314790,
+      "datetime": "2026-02-28T21:39:50+00:00",
+      "matched_cable": "Tangerine",
+      "distance_to_cable_km": 0.0237
+    },
+    {
+      "lat": 51.33562,
+      "lon": 2.1203,
+      "score": 5,
+      "reasons": [
+        "very_close_to_cable",
+        "cable_crossing"
+      ],
+      "alert_level": "Review",
+      "timestamp": 1772314797,
+      "datetime": "2026-02-28T21:39:57+00:00",
+      "matched_cable": "Tangerine",
+      "distance_to_cable_km": 0.0289
+    },
+    {
+      "lat": 51.70582,
+      "lon": 2.63238,
+      "score": 5,
+      "reasons": [
+        "very_close_to_cable",
+        "cable_crossing"
+      ],
+      "alert_level": "Review",
+      "timestamp": 1772327087,
+      "datetime": "2026-03-01T01:04:47+00:00",
+      "matched_cable": "Interconnector",
+      "distance_to_cable_km": 0.0363
+    },
+    {
+      "lat": 51.70559,
+      "lon": 2.63242,
+      "score": 5,
+      "reasons": [
+        "very_close_to_cable",
+        "cable_crossing"
+      ],
+      "alert_level": "Review",
+      "timestamp": 1772327106,
+      "datetime": "2026-03-01T01:05:06+00:00",
+      "matched_cable": "Interconnector",
+      "distance_to_cable_km": 0.0107
+    },
+    {
+      "lat": 51.7052,
+      "lon": 2.6325,
+      "score": 5,
+      "reasons": [
+        "very_close_to_cable",
+        "cable_crossing"
+      ],
+      "alert_level": "Review",
+      "timestamp": 1772327137,
+      "datetime": "2026-03-01T01:05:37+00:00",
+      "matched_cable": "Interconnector",
+      "distance_to_cable_km": 0.0331
+    },
+    {
+      "lat": 51.69553,
+      "lon": 2.65684,
+      "score": 5,
+      "reasons": [
+        "very_close_to_cable",
+        "cable_crossing"
+      ],
+      "alert_level": "Review",
+      "timestamp": 1772336228,
+      "datetime": "2026-03-01T03:37:08+00:00",
+      "matched_cable": "Interconnector",
+      "distance_to_cable_km": 0.023
+    },
+    {
+      "lat": 51.69522,
+      "lon": 2.65657,
+      "score": 5,
+      "reasons": [
+        "very_close_to_cable",
+        "cable_crossing"
+      ],
+      "alert_level": "Review",
+      "timestamp": 1772336236,
+      "datetime": "2026-03-01T03:37:16+00:00",
+      "matched_cable": "Interconnector",
+      "distance_to_cable_km": 0.0162
+    },
+    {
+      "lat": 51.6544,
+      "lon": 2.65392,
+      "score": 5,
+      "reasons": [
+        "very_close_to_cable",
+        "cable_crossing"
+      ],
+      "alert_level": "Review",
+      "timestamp": 1772337148,
+      "datetime": "2026-03-01T03:52:28+00:00",
+      "matched_cable": "Concerto 1S",
+      "distance_to_cable_km": 0.0393
+    },
+    {
+      "lat": 51.48633,
+      "lon": 2.67208,
+      "score": 5,
+      "reasons": [
+        "very_close_to_cable",
+        "cable_crossing"
+      ],
+      "alert_level": "Review",
+      "timestamp": 1772340808,
+      "datetime": "2026-03-01T04:53:28+00:00",
+      "matched_cable": "SEA-ME-WE3 SEG 10.4",
+      "distance_to_cable_km": 0.0398
+    },
+    {
+      "lat": 51.48115,
+      "lon": 2.6724,
+      "score": 5,
+      "reasons": [
+        "very_close_to_cable",
+        "cable_crossing"
+      ],
+      "alert_level": "Review",
+      "timestamp": 1772340917,
+      "datetime": "2026-03-01T04:55:17+00:00",
+      "matched_cable": "RIOJA 3",
+      "distance_to_cable_km": 0.0249
     }
   ]
 }

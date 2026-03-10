@@ -194,10 +194,39 @@
     background: rgba(26,42,58,0.5); border: 1px solid var(--border);
     font-family: 'Share Tech Mono', monospace; font-size: 0.7rem;
   }
+  .alert-row.alert-crossing { flex-direction: column; align-items: stretch; cursor: pointer; }
+  .alert-row.alert-crossing:hover { border-color: var(--cyan); background: rgba(0,212,255,0.08); }
+  .alert-row.alert-point { flex-direction: column; align-items: stretch; cursor: pointer; }
+  .alert-row.alert-point:hover { border-color: var(--cyan); background: rgba(0,212,255,0.08); }
   .alert-row.score-high { border-left: 3px solid var(--red); }
   .alert-row.score-mid { border-left: 3px solid var(--amber); }
   .alert-score { color: var(--cyan); font-weight: 600; min-width: 24px; }
   .alert-reasons { color: var(--text-dim); font-size: 0.62rem; }
+  .alert-name { color: var(--text-hi); font-weight: 500; }
+  .alert-meta { color: var(--text-dim); font-size: 0.65rem; margin-top: 2px; }
+  .alerts-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+  .alerts-badge { font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; color: var(--red); border: 1px solid var(--red); padding: 2px 6px; letter-spacing: 0.08em; }
+
+  /* ── VESSEL SUMMARY ── */
+  .vessel-summary {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    margin-bottom: 20px;
+    background: rgba(26,42,58,0.4);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+  .vessel-summary img {
+    width: 120px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 3px;
+    border: 1px solid var(--border-hi);
+  }
+  .vessel-summary-info { flex: 1; }
+  .vessel-summary-name { font-size: 1.1rem; font-weight: 600; color: var(--text-hi); margin-bottom: 4px; }
+  .vessel-summary-meta { font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; }
 
   .sec {
     font-family: 'Share Tech Mono', monospace;
@@ -309,6 +338,7 @@
   .pu-status { font-family:'Share Tech Mono',monospace; font-size:0.56rem; letter-spacing:0.18em; margin-bottom:3px; }
   .pu-name   { font-size:0.92rem; font-weight:600; color:var(--text-hi); letter-spacing:0.04em; margin-bottom:4px; }
   .pu-desc   { font-size:0.78rem; color:var(--text); line-height:1.5; max-width:195px; }
+  .pu-meta   { font-size:0.7rem; color:var(--text-dim); margin-top:4px; }
   .pu-prop   { font-family:'Share Tech Mono',monospace; font-size:0.62rem; font-weight:400; color:var(--text-dim); margin-bottom:2px; }
   .pu-prop-k { color:var(--cyan); opacity:0.8; }
   .pu-prop-v { color:var(--text); margin-left:4px; word-break:break-word; max-width:220px; }
@@ -387,6 +417,7 @@
 
     <div class="tab-pane active" id="pane-vessel">
     <div class="scroll-body" id="report-body">
+      <div id="vessel-summary" class="vessel-summary" style="display:none"></div>
       <div class="loading-msg" id="loading-msg">Loading data…</div>
 
       <div class="legend" id="legend" style="display:none">
@@ -421,7 +452,7 @@
 </div>
 
 <!-- Embedded config fallback (used when fetch fails, e.g. file://) -->
-<script type="application/json" id="config-fallback">{"title":"Ethera — Vessel Transit","reference":"REF-ETH-2026","eventCount":0,"dataSources":{"infrastructure":"/data/openstreetmapdata-export.geojson","etheraLine":"/ethera/ethera.data.line.geojson","etheraPoints":"/ethera/ethera.data.points.geojson","etheraIntersection":"/ethera/ethera.data-intersection.geojson","etheraAlerts":"/ethera/ethera-alerts.json"},"report":{"sections":[{"title":"// risk assessment","paragraphs":["Estimated risk assessment: ~80–85% elevated risk. The vessel [energy-progress] (IMO 9387279) is a 2008-built medium-range product/chemical tanker (~46,600 DWT; 183 m × 32 m; service speed ~14–15 kn) whose risk profile is significantly increased due to identity manipulation indicators, including a change of MMSI and operation under a false Guinea flag, both commonly linked to sanctions-evasion practices used by parts of the Russian shadow tanker fleet.","Although factors such as age (~17 years), reflagging history, and ownership transfers can occur in normal tanker markets, the combination of a fraudulent flag, AIS identity changes, and transit through the busy North Sea–English Channel [track] with multiple subsea [cable-crossings] would likely trigger high-priority monitoring by maritime security and coast-watch authorities."]},{"title":"// map & data reference","paragraphs":["<span id=\"data-ref\"></span>See [track] and [cable-crossings] on map. Click the track (green line) for voyage summary. Click track points for timestamps. Red markers show cable/pipeline crossings — click for details. See Alerts tab for scored points."]}]},"geojson":null}</script>
+<script type="application/json" id="config-fallback">{"title":"Ethera — Vessel Transit","reference":"REF-ETH-2026","eventCount":0,"vessel":{"name":"ETHERA","imo":"9387279","mmsi":"632001149","image":"/boats/9387279.jpeg","type":"Chemical/Oil Products Tanker","built":"2008","size":"183 m × 32 m","flag":"Guinea","sanctions":"EU, UK (OFSI), US (OFAC)"},"dataSources":{"infrastructure":"/data/openstreetmapdata-export.geojson","etheraLine":"/ethera/ethera.data.line.geojson","etheraPoints":"/ethera/ethera.data.points.geojson","etheraIntersection":"/ethera/ethera.data-intersection.geojson","etheraAlerts":"/ethera/ethera-alerts.json"},"report":{"sections":[{"title":"Voyage","paragraphs":["[ethera] sailed along the [track] through the North Sea and English Channel, passing the Belgian and Dutch coast. The green line on the map shows the route. Red markers show where the ship crossed underwater cables or pipelines — click any name below to find it on the map."]},{"title":"Cable & pipeline crossings","paragraphs":["Along the route, the ship crossed several communications cables: [concerto-1s-0], [hermes-south-0], [pan-european-crossing-pec-0], [rioja-3-0], [tangerine-0], and [rioja-2-0]. It also crossed the [franpipe-0] gas pipeline, the [interconnector-0] (UK–Belgium gas link), and the [nemo-link-0] power cable. Near the wind farms it crossed export cables such as [rentel-exportkabel-0], [thorntonbank-exportkabel-b-0], [norther-exportkabel-0], [belwind-exportkabel-0], and [northwind-exportkabel-0]."]},{"title":"Suspicious activity context","paragraphs":["Vessel activity was reported close to critical infrastructure, including wind farms and subsea cables, and AIS was reportedly switched off during the period of interest. This pattern is consistent with possible reconnaissance or infrastructure-mapping behavior."]},{"title":"Map tips","paragraphs":["<span id=\"data-ref\"></span>Click [track] or [cable-crossings] to jump to the map. Click the green line for voyage dates. Click red markers for crossing details."]}]},"geojson":null}</script>
 
 <!-- Connector SVG overlay -->
 <svg id="conn-svg" xmlns="http://www.w3.org/2000/svg">
@@ -567,8 +598,23 @@ async function init() {
   // Apply config to header/panel
   document.getElementById('hdr-title').textContent = config?.title ?? 'Boatstories — Demo';
   document.getElementById('panel-ref').textContent = 'Voyage Report · ' + (config?.reference ?? '—');
-  const eventCount = config?.eventCount ?? geoData?.features?.filter(f => f.geometry?.type === 'Point').length ?? 0;
-  document.getElementById('panel-events').textContent = `[ ${eventCount} EVENTS ]`;
+  const alertCount = etheraAlerts?.high_score_points?.length ?? (etheraIntersection?.features?.filter(f => f.properties?.['_role'] === 'intersection_centroid') ?? []).length ?? 0;
+  const geoCount = (geoData?.features?.filter(f => f.geometry?.type === 'Point') ?? []).length;
+  const eventCount = config?.eventCount ?? (alertCount || geoCount);
+  document.getElementById('panel-events').textContent = `[ ${eventCount} ALERTS ]`;
+
+  // Build vessel summary (top of vessel panel)
+  const vesselEl = document.getElementById('vessel-summary');
+  if (vesselEl && config?.vessel) {
+    const v = config.vessel;
+    const safe = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+    vesselEl.innerHTML = `<img src="${safe(v.image)}" alt="${safe(v.name) || 'Vessel'}" onerror="this.style.display='none'">
+      <div class="vessel-summary-info">
+        <div class="vessel-summary-name">${safe(v.name) || '—'}</div>
+        <div class="vessel-summary-meta">${[v.type, v.built && `Built ${v.built}`, v.size, v.flag, v.sanctions && `Sanctions: ${v.sanctions}`].filter(Boolean).map(safe).join(' · ')}</div>
+      </div>`;
+    vesselEl.style.display = 'flex';
+  }
 
   // Build report body
   if (config?.report?.sections?.length) {
@@ -609,29 +655,94 @@ async function init() {
     });
   });
 
-  // Render alerts tab
+  // Render alerts tab — from ethera-alerts.json (real-data analysis) and ethera.data-intersection.geojson (cable crossings)
   const alertsEl = document.getElementById('alerts-content');
-  if (etheraAlerts) {
-    const s = etheraAlerts.summary || {};
-    const level = s.max_point_score >= 9 ? 'High-priority' : s.max_point_score >= 6 ? 'Escalate' : s.max_point_score >= 3 ? 'Review' : 'Low';
-    alertsEl.innerHTML = `<div class="sec">// alert scoring</div>
-      <p><strong>Scenario</strong> ${etheraAlerts.label || '—'} · <strong>Total score</strong> ${s.total_score ?? 0} · <strong>Max point</strong> ${s.max_point_score ?? 0}</p>
-      <p><strong>Level</strong> ${level} · <strong>Alert points</strong> ${s.alert_points ?? 0}</p>
-      <div class="sec" style="margin-top:16px">// score breakdown</div>
-      ${Object.entries(etheraAlerts.score_breakdown || {}).map(([r, c]) => `<div class="alert-row"><span class="alert-score">${c}×</span><span class="alert-reasons">${r}</span></div>`).join('')}
-      <div class="sec" style="margin-top:16px">// high-score points</div>
-      ${(etheraAlerts.high_score_points || []).slice(0, 15).map(p => `<div class="alert-row score-${p.score >= 6 ? 'high' : 'mid'}"><span class="alert-score">${p.score}</span><span>${p.lat?.toFixed(4)}, ${p.lon?.toFixed(4)}</span><span class="alert-reasons">${(p.reasons || []).join(', ')}</span></div>`).join('')}`;
-  } else {
-    alertsEl.innerHTML = '<p class="loading-msg">No alert data. Run: python synthetic_data_engine.py loitering</p>';
+  const fmtTs = v => v == null ? '' : (typeof v === 'number' && v > 1e9 ? new Date(v * 1000).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' }) : String(v));
+  const escHtml = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const humanizeReason = r => {
+    const m = { very_close_to_cable: 'Very close to cable', cable_crossing: 'Cable crossing', inside_restricted_area: 'Inside restricted area', inside_no_anchoring: 'Inside no-anchoring zone', anchoring_near_asset: 'Anchoring near asset', sustained_low_speed: 'Low speed near asset', ais_gap_near_asset: 'AIS gap near asset', large_cog_heading_mismatch: 'Heading/course mismatch' };
+    return m[r] || r.replace(/_/g, ' ');
+  };
+  const crossings = etheraIntersection?.features?.filter(f => f.geometry?.type === 'Point' && f.properties?.['_role'] === 'intersection_centroid') ?? [];
+  const highPoints = etheraAlerts?.high_score_points ?? [];
+  let html = '';
+
+  // Primary: Risk alerts (high-score points from real-data analysis)
+  if (highPoints.length) {
+    const s = etheraAlerts?.summary || {};
+    const level = s.max_point_score >= 9 ? 'High-priority' : s.max_point_score >= 6 ? 'Escalate' : 'Review';
+    html += `<div class="sec">Risk alerts</div>
+      <div class="alerts-header">
+        <p><strong>${highPoints.length}</strong> alert points · ${etheraAlerts?.label || 'Real-data analysis'}</p>
+        <span class="alerts-badge">${level}</span>
+      </div>
+      <p style="font-size:0.75rem;color:var(--text-dim);margin-bottom:12px">Click any row to locate on map.</p>
+      ${highPoints.map((p, i) => {
+        const id = `alert-${i}`;
+        const reasons = (p.reasons || []).map(humanizeReason).join(', ');
+        const dt = p.datetime ? fmtTs(p.timestamp) : '';
+        const cable = p.matched_cable ? ` · ${escHtml(p.matched_cable)}` : '';
+        const dist = p.distance_to_cable_km != null ? ` · ${Number(p.distance_to_cable_km).toFixed(3)} km` : '';
+        return `<div class="alert-row alert-point score-${p.score >= 6 ? 'high' : 'mid'}" data-id="${id}" data-lat="${p.lat}" data-lon="${p.lon}">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+            <span class="alert-score">${p.score}</span>
+            <span class="alert-name">${escHtml(p.alert_level || 'Review')}</span>
+          </div>
+          <span class="alert-meta">${escHtml(dt)}${cable}${dist}</span>
+          <span class="alert-reasons" style="margin-top:4px;display:block">${escHtml(reasons)}</span>
+        </div>`;
+      }).join('')}`;
   }
 
-  runMap(geoData, { infrastructure, etheraLine, etheraPoints, etheraIntersection });
+  // Score breakdown
+  if (etheraAlerts?.score_breakdown && Object.keys(etheraAlerts.score_breakdown).length) {
+    html += `<div class="sec" style="margin-top:20px">Score breakdown</div>
+      ${Object.entries(etheraAlerts.score_breakdown).map(([r, c]) => `<div class="alert-row"><span class="alert-score">${c}×</span><span class="alert-reasons">${humanizeReason(r)}</span></div>`).join('')}`;
+  }
+
+  // Secondary: Cable crossings
+  if (crossings.length) {
+    html += `<div class="sec" style="margin-top:20px">Cable & pipeline crossings</div>
+      <p style="font-size:0.75rem;color:var(--text-dim);margin-bottom:8px"><strong>${crossings.length}</strong> crossings from track. Click to locate.</p>
+      ${crossings.map((f, i) => {
+        const p = f.properties ?? {};
+        const name = p.name || p.description || p['seamark:name'] || 'Crossing';
+        const type = p['man_made'] === 'pipeline' ? 'Pipeline' : (p['seamark:type'] === 'cable_submarine' ? 'Cable' : 'Infrastructure');
+        const ts = fmtTs(p._timestamp);
+        const dist = p._nearestDistKm != null ? `${Number(p._nearestDistKm).toFixed(3)} km` : '';
+        const [lng, lat] = f.geometry?.coordinates ?? [0, 0];
+        const baseId = String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'crossing';
+        const slugId = `${baseId}-${p._hitIndex ?? i}`;
+        return `<div class="alert-row alert-crossing" data-id="${escHtml(slugId)}" data-lat="${lat}" data-lon="${lng}"><span class="alert-name">${escHtml(name)}</span><span class="alert-meta">${escHtml(type)}${ts ? ' · ' + escHtml(ts) : ''}${dist ? ' · ' + escHtml(dist) : ''}</span></div>`;
+      }).join('')}`;
+  }
+
+  if (html) {
+    alertsEl.innerHTML = html;
+    const panToAndShow = (id, lat, lon) => {
+      if (!lat || !lon) return;
+      map.panTo([lat, lon], { animate: true, duration: 0.4 });
+      map.setZoom(Math.max(map.getZoom(), 12));
+      if (markers[id]) markers[id].openPopup();
+    };
+    alertsEl.querySelectorAll('.alert-crossing, .alert-point').forEach(row => {
+      row.addEventListener('click', () => {
+        const id = row.dataset.id;
+        const lat = parseFloat(row.dataset.lat), lon = parseFloat(row.dataset.lon);
+        panToAndShow(id, lat, lon);
+      });
+    });
+  } else {
+    alertsEl.innerHTML = '<p class="loading-msg">No alert data. Run: python synthetic_data_engine.py --analyze</p>';
+  }
+
+  runMap(geoData, { infrastructure, etheraLine, etheraPoints, etheraIntersection, etheraAlerts });
 }
 
 function slug(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'crossing'; }
 
 function runMap(geoData, layers = {}) {
-  const { infrastructure, etheraLine, etheraPoints, etheraIntersection } = layers;
+  const { infrastructure, etheraLine, etheraPoints, etheraIntersection, etheraAlerts } = layers;
   const features = geoData?.features ?? [];
   let SITES = features
     .filter(f => f?.geometry?.type === 'Point')
@@ -654,7 +765,7 @@ function runMap(geoData, layers = {}) {
     trackBounds = [[Math.min(...lats), Math.min(...lngs)], [Math.max(...lats), Math.max(...lngs)]];
     etheraSites.push({ id: 'track', name: 'Vessel track', icon: 'check', desc: 'Ethera voyage track', status: 'nominal',
       coords: [cLat, cLng], cls: 'c-green', color: '#00e87a', kwCls: 's-green', statusLabel: 'TRACK', _trackBounds: trackBounds });
-    etheraSites.push({ id: 'energy-progress', name: 'ENERGY PROGRESS', icon: 'info', desc: 'Vessel track', status: 'nominal',
+    etheraSites.push({ id: 'ethera', name: 'ETHERA', icon: 'info', desc: 'Vessel track', status: 'nominal',
       coords: [cLat, cLng], cls: 'c-green', color: '#00e87a', kwCls: 's-green', statusLabel: 'VESSEL', _trackBounds: trackBounds });
   }
   const centroids = etheraIntersection?.features?.filter(f => f.geometry?.type === 'Point' && f.properties?.['_role'] === 'intersection_centroid') ?? [];
@@ -667,12 +778,12 @@ function runMap(geoData, layers = {}) {
     if (!firstCrossingId) firstCrossingId = id;
     etheraSites.push({ id, name, icon: 'warn', desc: 'Cable/pipeline crossing', status: 'priority',
       coords: [f.geometry.coordinates[1], f.geometry.coordinates[0]],
-      cls: 'c-red', color: '#ff3b3b', kwCls: 's-red', statusLabel: 'CROSSING' });
+      cls: 'c-red', color: '#ff3b3b', kwCls: 's-red', statusLabel: 'CROSSING', _hasRichPopup: true });
   });
   if (firstCrossingId && !etheraSites.some(s => s.id === 'cable-crossings')) {
     const first = etheraSites.find(s => s.id === firstCrossingId);
     etheraSites.unshift({ id: 'cable-crossings', name: 'Cable crossings', icon: 'warn', desc: 'Subsea cable crossings', status: 'priority',
-      coords: first.coords, cls: 'c-red', color: '#ff3b3b', kwCls: 's-red', statusLabel: 'CROSSINGS', _aliasOf: firstCrossingId });
+      coords: first.coords, cls: 'c-red', color: '#ff3b3b', kwCls: 's-red', statusLabel: 'CROSSINGS', _aliasOf: firstCrossingId, _hasRichPopup: true });
   }
   SITES = SITES.concat(etheraSites);
 
@@ -797,12 +908,16 @@ function activate(id, src) {
     if (src !== 'marker') map.fitBounds(site._trackBounds, { animate: true, duration: 0.4, padding: [60, 60] });
   } else if (m) {
     if (src !== 'marker') map.panTo(m.getLatLng(), { animate: true, duration: 0.4 });
-    m.bindPopup(
-      `<div class="pu-status" style="color:${site.color}">${site.statusLabel}</div>
-       <div class="pu-name">${site.name}</div>
-       <div class="pu-desc">${site.desc}</div>`,
-      { offset: [0, -20], closeButton: false, autoPan: false }
-    ).openPopup();
+    if (site._hasRichPopup) {
+      m.openPopup();
+    } else {
+      m.bindPopup(
+        `<div class="pu-status" style="color:${site.color}">${site.statusLabel}</div>
+         <div class="pu-name">${site.name}</div>
+         <div class="pu-desc">${site.desc}</div>`,
+        { offset: [0, -20], closeButton: false, autoPan: false }
+      ).openPopup();
+    }
   }
 
   setTimeout(() => drawConn(id), src === 'keyword' ? 0 : 260);
@@ -941,6 +1056,27 @@ if (etheraIntersection?.features?.length) {
       }
       if (id === firstCrossingId) markers['cable-crossings'] = m;
     }
+  });
+}
+
+// ── RENDER ALERT POINTS (high_score_points from ethera-alerts.json) ───────────
+if (etheraAlerts?.high_score_points?.length) {
+  const alertIcon = L.divIcon({
+    html: `<div class="site-icon c-red">${makeSvg('warn', 16)}</div>`,
+    className: '', iconSize: [28, 28], iconAnchor: [14, 14]
+  });
+  etheraAlerts.high_score_points.forEach((p, i) => {
+    const id = `alert-${i}`;
+    const lat = p.lat, lon = p.lon;
+    if (lat == null || lon == null) return;
+    const reasons = (p.reasons || []).join(', ');
+    const cable = p.matched_cable ? ` · ${p.matched_cable}` : '';
+    const dist = p.distance_to_cable_km != null ? ` · ${Number(p.distance_to_cable_km).toFixed(3)} km` : '';
+    const ts = p.timestamp ? new Date(p.timestamp * 1000).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' }) : '';
+    const html = `<div class="pu-status" style="color:#ff3b3b">ALERT</div><div class="pu-name">Score ${p.score} · ${p.alert_level || 'Review'}</div><div class="pu-desc">${esc(reasons)}${cable}${dist}</div><div class="pu-meta">${esc(ts)}</div>`;
+    const m = L.marker([lat, lon], { icon: alertIcon }).addTo(map);
+    m.bindPopup(html, { offset: [0, -14], closeButton: false });
+    markers[id] = m;
   });
 }
 

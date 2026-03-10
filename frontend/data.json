@@ -2,6 +2,17 @@
   "title": "Ethera — Vessel Transit & Infrastructure",
   "reference": "REF-ETH-2026",
   "eventCount": 0,
+  "vessel": {
+    "name": "ETHERA",
+    "imo": "9387279",
+    "mmsi": "632001149",
+    "image": "/boats/9387279.jpeg",
+    "type": "Chemical/Oil Products Tanker",
+    "built": "2008",
+    "size": "183 m × 32 m",
+    "flag": "Guinea",
+    "sanctions": "EU, UK (OFSI), US (OFAC)"
+  },
   "dataSources": {
     "infrastructure": "/data/openstreetmapdata-export.geojson",
     "etheraLine": "/ethera/ethera.data.line.geojson",
@@ -12,16 +23,27 @@
   "report": {
     "sections": [
       {
-        "title": "// risk assessment",
+        "title": "Voyage",
         "paragraphs": [
-          "Estimated risk assessment: ~80–85% elevated risk. The vessel [energy-progress] (IMO 9387279) is a 2008-built medium-range product/chemical tanker (~46,600 DWT; 183 m × 32 m; service speed ~14–15 kn) whose risk profile is significantly increased due to identity manipulation indicators, including a change of MMSI and operation under a false Guinea flag, both commonly linked to sanctions-evasion practices used by parts of the Russian shadow tanker fleet.",
-          "Although factors such as age (~17 years), reflagging history, and ownership transfers can occur in normal tanker markets, the combination of a fraudulent flag, AIS identity changes, and transit through the busy North Sea–English Channel [track] with multiple subsea [cable-crossings] would likely trigger high-priority monitoring by maritime security and coast-watch authorities."
+          "[ethera] sailed along the [track] through the North Sea and English Channel, passing the Belgian and Dutch coast. The green line on the map shows the route. Red markers show where the ship crossed underwater cables or pipelines — click any name below to find it on the map."
         ]
       },
       {
-        "title": "// map & data reference",
+        "title": "Cable & pipeline crossings",
         "paragraphs": [
-          "<span id=\"data-ref\"></span>See [track] and [cable-crossings] on map. Click the track (green line) for voyage summary. Click track points for timestamps. Red markers show cable/pipeline crossings — click for details. See Alerts tab for scored points."
+          "Along the route, the ship crossed several communications cables: [concerto-1s-0], [hermes-south-0], [pan-european-crossing-pec-0], [rioja-3-0], [tangerine-0], and [rioja-2-0]. It also crossed the [franpipe-0] gas pipeline, the [interconnector-0] (UK–Belgium gas link), and the [nemo-link-0] power cable. Near the wind farms it crossed export cables such as [rentel-exportkabel-0], [thorntonbank-exportkabel-b-0], [norther-exportkabel-0], [belwind-exportkabel-0], and [northwind-exportkabel-0]."
+        ]
+      },
+      {
+        "title": "Suspicious activity context",
+        "paragraphs": [
+          "Vessel activity was reported close to critical infrastructure, including wind farms and subsea cables, and AIS was reportedly switched off during the period of interest. This pattern is consistent with possible reconnaissance or infrastructure-mapping behavior."
+        ]
+      },
+      {
+        "title": "Map tips",
+        "paragraphs": [
+          "<span id=\"data-ref\"></span>Click [track] or [cable-crossings] to jump to the map. Click the green line for voyage dates. Click red markers for crossing details."
         ]
       }
     ]
