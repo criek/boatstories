@@ -1,0 +1,12 @@
+{
+  "requested_identifier": "255916493",
+  "requested_id_field": "mmsi",
+  "timestamp_requested": null,
+  "include_map": false,
+  "outputs": {
+    "details_raw": "details_raw.json",
+    "details_normalized": "details_normalized.json",
+    "history_raw": "history_raw.txt",
+    "history_parsed": "history_parsed.json"
+  }
+}

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MV Stellarfjord — North Sea Transit Log</title>
+<title>Boatstories — Vessel Transit Log</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -155,6 +155,14 @@
   .scroll-body::-webkit-scrollbar { width: 3px; }
   .scroll-body::-webkit-scrollbar-track { background: transparent; }
   .scroll-body::-webkit-scrollbar-thumb { background: var(--border-hi); }
+
+  .loading-msg {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    padding: 20px 0;
+  }
 
   .sec {
     font-family: 'Share Tech Mono', monospace;
@@ -317,11 +325,11 @@
 
 <header>
   <span class="hdr-sys">SYS://</span>
-  <span class="hdr-title">MV Stellarfjord — North Sea Transit Log</span>
+  <span class="hdr-title" id="hdr-title">—</span>
   <div class="hdr-fill"></div>
   <span class="hdr-hint">SELECT KEYWORD OR MARKER TO LINK</span>
   <div style="width:14px"></div>
-  <span class="live-pill">● LIVE</span>
+  <span class="live-pill" id="live-pill">● LIVE</span>
 </header>
 
 <div class="layout">
@@ -329,29 +337,14 @@
   <!-- REPORT PANEL -->
   <div class="report-panel">
     <div class="panel-bar">
-      <span class="panel-bar-label">Voyage Report · REF-NS-2024-0441</span>
-      <span class="panel-bar-nodes">[ 4 EVENTS ]</span>
+      <span class="panel-bar-label" id="panel-ref">Voyage Report · —</span>
+      <span class="panel-bar-nodes" id="panel-events">[ 0 EVENTS ]</span>
     </div>
 
-    <div class="scroll-body">
+    <div class="scroll-body" id="report-body">
+      <div class="loading-msg" id="loading-msg">Loading data…</div>
 
-      <div class="sec">// voyage summary</div>
-      <p>MV Stellarfjord departed Immingham on 14 Nov 2024, bound for Bergen via the central North Sea corridor. The vessel tracked north-northwest across the Dogger Bank before turning onto a northerly heading through the Norwegian Trench. Transit duration: 61 hours. Four subsea cable crossings were logged en route.</p>
-
-      <div class="sec">// cable crossing events</div>
-
-      <p>At 0312 UTC, [nemo-crossing] was recorded at 54.8°N as the vessel passed over the NEMO interconnector linking the UK and Belgium. Crossing speed was reduced to 6 knots per standing cable protection orders. No anomalies recorded.</p>
-
-      <p>By mid-morning, [nord-link-approach] brought the vessel over the NordLink HVDC cable running between Norway and Germany. The crossing occurred in deteriorating weather — wind force 7, 3.5m swell — and was logged as routine. Cable protection zone observed without incident.</p>
-
-      <p>The most operationally complex crossing was [viking-link-transit], where the vessel tracked parallel to the Viking Link corridor for approximately 14 nautical miles before the designated crossing point. Proximity to the cable route triggered an automatic AIS alert. Bridge watch was doubled and anchor was secured for the duration.</p>
-
-      <p>[norwegian-trench-entry] marks the vessel's descent into the Norwegian Trench, crossing a cluster of Norwegian Petroleum Directorate-registered pipeline routes. Depth increases sharply to over 700m. Reduced speed maintained until clear of the restricted zone.</p>
-
-      <div class="sec">// master's remarks</div>
-      <p>All four crossing events — [nemo-crossing], [nord-link-approach], [viking-link-transit], and [norwegian-trench-entry] — were completed in accordance with applicable cable protection protocols. No emergency procedures were required. Vessel arrived Bergen 16 Nov 2024 at 1634 UTC.</p>
-
-      <div class="legend">
+      <div class="legend" id="legend" style="display:none">
         <div class="sec" style="margin-top:0">// status codes</div>
         <div class="legend-row">
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#ff3b3b" stroke-width="1.9" stroke-linejoin="round"><path d="M8 2.5L13.5 13H2.5L8 2.5z"/><line x1="8" y1="7" x2="8" y2="10"/><circle cx="8" cy="11.8" r="0.65" fill="#ff3b3b" stroke="none"/></svg>
@@ -377,6 +370,9 @@
 
 </div>
 
+<!-- Embedded config fallback (used when fetch fails, e.g. file://) -->
+<script type="application/json" id="config-fallback">{"title":"Ethera — Vessel Transit","reference":"REF-ETH-2026","eventCount":0,"dataSources":{"infrastructure":"data/openstreetmapdata-export.geojson","etheraLine":"data/ethera/ethera.line.geojson","etheraPoints":"data/ethera/ethera.points.geojson","etheraIntersection":"data/ethera/ethera-intersection.geojson"},"report":{"sections":[{"title":"// voyage summary","paragraphs":["Ethera vessel track overlaid on critical infrastructure. Serve via HTTP for full data."]}]},"geojson":null}</script>
+
 <!-- Connector SVG overlay -->
 <svg id="conn-svg" xmlns="http://www.w3.org/2000/svg">
   <path id="conn-path"/>
@@ -387,11 +383,12 @@
 </svg>
 
 <script>
-// ── GEOJSON SOURCE ────────────────────────────────────────────────────────────
-// Edit this string to change sites and lines. Points need: id, name, status
-// (priority|moderate|nominal), icon (warn|info|check), desc.
-// LineStrings are rendered as styled overlays; add a 'label' property to annotate.
-const GEOJSON_SRC = `{
+// ── DATA LOADING (POC) ────────────────────────────────────────────────────────
+// Loads from data.json (same folder). Colleagues drop in new data without editing HTML.
+// Fallback: embedded demo when fetch fails (e.g. file:// or no data.json).
+// Data format: { title, reference, eventCount, report: { sections }, geojson }
+// Or raw GeoJSON FeatureCollection for map-only.
+const DEMO_GEOJSON = `{
   "type": "FeatureCollection",
   "features": [
     {
@@ -478,19 +475,83 @@ const STATUS_META = {
   nominal:  { cls:'c-green', color:'#00e87a', kwCls:'s-green', label:'NOMINAL'  },
 };
 
-const geoData = JSON.parse(GEOJSON_SRC);
-const SITES = geoData.features
-  .filter(f => f.geometry.type === 'Point')
-  .map(f => {
-    const p = f.properties;
-    const meta = STATUS_META[p.status] ?? STATUS_META.nominal;
-    return { id: p.id, name: p.name, icon: p.icon, desc: p.desc, status: p.status,
-             coords: [f.geometry.coordinates[1], f.geometry.coordinates[0]],
-             cls: meta.cls, color: meta.color, kwCls: meta.kwCls, statusLabel: meta.label };
-  });
+// ── INIT (async) ─────────────────────────────────────────────────────────────
+async function init() {
+  const loadingMsg = document.getElementById('loading-msg');
+  const reportBody = document.getElementById('report-body');
+  const legend = document.getElementById('legend');
+  const clearLoading = (msg) => { loadingMsg.textContent = msg || ''; loadingMsg.style.display = msg ? 'block' : 'none'; };
 
-// Inner paths only — assembled into full <svg> tags at each use site via makeSvg()
-const ICONS = {
+  let config = null;
+  const dataFile = new URLSearchParams(location.search).get('data') || 'data.json';
+  try {
+    const res = await fetch(dataFile);
+    if (res.ok) config = await res.json();
+    else clearLoading('Failed to load data.json (' + res.status + '). Run: cd output && python -m http.server 8000');
+  } catch (e) {
+    const fb = document.getElementById('config-fallback');
+    if (fb) try { config = JSON.parse(fb.textContent); } catch (_) {}
+    if (!config) clearLoading('Cannot load data. Run: cd output && python -m http.server 8000');
+    console.error('Fetch error:', e);
+  }
+
+  const geoData = config?.geojson
+    ? (typeof config.geojson === 'string' ? JSON.parse(config.geojson) : config.geojson)
+    : (config && config.type === 'FeatureCollection' ? config
+       : (config?.dataSources && !config.geojson) ? { type: 'FeatureCollection', features: [] }
+       : JSON.parse(DEMO_GEOJSON));
+
+  // Fetch additional layers from dataSources
+  let infrastructure = null, etheraLine = null, etheraPoints = null, etheraIntersection = null;
+  const ds = config?.dataSources ?? {};
+  const base = new URL('.', location.href).href;
+  const fetchOpt = (path) => path ? fetch(new URL(path, base)).then(r => r.ok ? r.json() : null).catch(() => null) : Promise.resolve(null);
+  [infrastructure, etheraLine, etheraPoints, etheraIntersection] = await Promise.all([
+    fetchOpt(ds.infrastructure),
+    fetchOpt(ds.etheraLine),
+    fetchOpt(ds.etheraPoints),
+    fetchOpt(ds.etheraIntersection)
+  ]);
+
+  // Apply config to header/panel
+  document.getElementById('hdr-title').textContent = config?.title ?? 'Boatstories — Demo';
+  document.getElementById('panel-ref').textContent = 'Voyage Report · ' + (config?.reference ?? '—');
+  const eventCount = config?.eventCount ?? geoData?.features?.filter(f => f.geometry?.type === 'Point').length ?? 0;
+  document.getElementById('panel-events').textContent = `[ ${eventCount} EVENTS ]`;
+
+  // Build report body
+  if (config?.report?.sections?.length) {
+    loadingMsg.style.display = 'none';
+    config.report.sections.forEach(sec => {
+      const div = document.createElement('div');
+      div.innerHTML = `<div class="sec">${sec.title}</div>` +
+        (sec.paragraphs || []).map(p => `<p>${p}</p>`).join('');
+      reportBody.insertBefore(div, legend);
+    });
+  } else {
+    loadingMsg.textContent = 'No report data. Map only.';
+    loadingMsg.style.display = 'block';
+  }
+  legend.style.display = 'block';
+
+  runMap(geoData, { infrastructure, etheraLine, etheraPoints, etheraIntersection });
+}
+
+function runMap(geoData, layers = {}) {
+  const { infrastructure, etheraLine, etheraPoints, etheraIntersection } = layers;
+  const features = geoData?.features ?? [];
+  const SITES = features
+    .filter(f => f?.geometry?.type === 'Point')
+    .map(f => {
+      const p = f.properties ?? {};
+      const meta = STATUS_META[p.status] ?? STATUS_META.nominal;
+      return { id: p.id, name: p.name, icon: p.icon ?? 'info', desc: p.desc ?? '', status: p.status,
+               coords: [f.geometry.coordinates[1], f.geometry.coordinates[0]],
+               cls: meta.cls, color: meta.color, kwCls: meta.kwCls, statusLabel: meta.label };
+    });
+
+  // Inner paths only — assembled into full <svg> tags at each use site via makeSvg()
+  const ICONS = {
   warn:  { extra: 'stroke-linejoin="round"',                          paths: `<path stroke-width="1.9" d="M8 2.5L13.5 13H2.5L8 2.5z"/><line stroke-width="1.9" x1="8" y1="7" x2="8" y2="10"/><circle cx="8" cy="11.8" r="0.75" fill="currentColor" stroke="none"/>` },
   info:  { extra: '',                                                   paths: `<circle stroke-width="1.9" cx="8" cy="8" r="5.5"/><line stroke-width="1.9" x1="8" y1="6" x2="8" y2="9.5"/><circle cx="8" cy="11.2" r="0.75" fill="currentColor" stroke="none"/>` },
   check: { extra: 'stroke-linecap="round" stroke-linejoin="round"',   paths: `<circle stroke-width="1.9" cx="8" cy="8" r="5.5"/><polyline stroke-width="2.2" points="5.2,8.2 7.3,10.4 11.2,5.8"/>` },
@@ -629,11 +690,92 @@ function deactivate() {
   activeId = null;
 }
 
-// ── RENDER LINES FROM GEOJSON ────────────────────────────────────────────────
+// ── RENDER INFRASTRUCTURE (pipelines, cables, wind farms) ────────────────────
+function addGeoJsonLayer(data, options = {}) {
+  if (!data?.features?.length) return;
+  const { fillColor, color, weight = 2 } = options;
+  data.features.forEach(f => {
+    const g = f.geometry;
+    if (!g) return;
+    const p = f.properties ?? {};
+    const name = p.name || p['seamark:name'] || p.description || '';
+    const type = p['seamark:type'] || '';
+    if (g.type === 'Polygon' || g.type === 'MultiPolygon') {
+      const polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
+      polys.forEach(poly => {
+        const outer = poly[0];
+        const latlngs = outer.map(c => [c[1], c[0]]);
+        L.polygon(latlngs, {
+          color: color ?? '#f5a623',
+          fillColor: fillColor ?? 'rgba(245,166,35,0.15)',
+          fillOpacity: 0.25,
+          weight: 1,
+          opacity: 0.6
+        }).bindTooltip(type || name || 'Infrastructure', { permanent: false, className: 'line-tooltip' }).addTo(map);
+      });
+    } else if (g.type === 'LineString') {
+      const latlngs = g.coordinates.map(c => [c[1], c[0]]);
+      const cableColor = type === 'cable_submarine' ? '#00d4ff' : '#8ba8be';
+      L.polyline(latlngs, {
+        color: cableColor,
+        weight: type === 'cable_submarine' ? 2 : 1,
+        opacity: 0.6,
+        dashArray: type === 'cable_submarine' ? '6 4' : '4 3'
+      }).bindTooltip(name || 'Cable', { permanent: false, className: 'line-tooltip' }).addTo(map);
+    }
+  });
+}
+
+if (infrastructure) addGeoJsonLayer(infrastructure);
+
+// ── RENDER ETHERA SHIP TRACK ──────────────────────────────────────────────────
+if (etheraLine?.features?.length) {
+  etheraLine.features.forEach(f => {
+    if (f.geometry?.type === 'LineString') {
+      const latlngs = f.geometry.coordinates.map(c => [c[1], c[0]]);
+      L.polyline(latlngs, {
+        color: '#00e87a',
+        weight: 3,
+        opacity: 0.9
+      }).bindTooltip('Ethera track', { permanent: false, className: 'line-tooltip' }).addTo(map);
+    }
+  });
+}
+if (etheraPoints?.features?.length) {
+  const pts = etheraPoints.features;
+  const step = Math.max(1, Math.floor(pts.length / 80));
+  for (let i = 0; i < pts.length; i += step) {
+    const f = pts[i];
+    if (f.geometry?.type === 'Point') {
+      const [lng, lat] = f.geometry.coordinates;
+      L.circleMarker([lat, lng], { radius: 3, fillColor: '#00e87a', color: '#00e87a', weight: 1, fillOpacity: 0.7 }).addTo(map);
+    }
+  }
+}
+
+// ── RENDER ETHERA INTERSECTION POINTS (cable/pipeline crossings) ─────────────────
+if (etheraIntersection?.features?.length) {
+  const icon = L.divIcon({
+    html: `<div class="site-icon c-red">${makeSvg('warn', 19)}</div>`,
+    className: '', iconSize: [34, 34], iconAnchor: [17, 17]
+  });
+  etheraIntersection.features.forEach(f => {
+    if (f.geometry?.type === 'Point' && f.properties?.['_role'] === 'intersection_centroid') {
+      const [lng, lat] = f.geometry.coordinates;
+      const p = f.properties;
+      const name = p.name || p.description || p['seamark:name'] || 'Cable crossing';
+      const type = p['man_made'] === 'pipeline' ? 'Pipeline' : (p['seamark:type'] === 'cable_submarine' ? 'Submarine cable' : 'Infrastructure');
+      const m = L.marker([lat, lng], { icon }).addTo(map);
+      m.bindPopup(`<div class="pu-status" style="color:#ff3b3b">CROSSING</div><div class="pu-name">${name}</div><div class="pu-desc">${type} — Ethera track intersection</div>`, { offset: [0, -20], closeButton: false });
+    }
+  });
+}
+
+// ── RENDER MAIN GEOJSON LINES ─────────────────────────────────────────────────
 const LINE_COLOR = { priority:'#ff3b3b', moderate:'#f5a623', nominal:'#00e87a' };
 
-geoData.features
-  .filter(f => f.geometry.type === 'LineString' || f.geometry.type === 'MultiLineString')
+features
+  .filter(f => f.geometry?.type === 'LineString' || f.geometry?.type === 'MultiLineString')
   .forEach(f => {
     const p   = f.properties ?? {};
     const col = LINE_COLOR[p.status] ?? '#3a7ca8';
@@ -666,7 +808,7 @@ SITES.forEach(s => {
   m.on('click', () => activate(s.id, 'marker'));
 });
 
-// ── FIT MAP TO GEOJSON BOUNDING BOX ─────────────────────────────────────────
+// ── FIT MAP TO BOUNDING BOX (all layers) ─────────────────────────────────────
 function bboxFit(data) {
   let minLng =  Infinity, maxLng = -Infinity;
   let minLat =  Infinity, maxLat = -Infinity;
@@ -676,10 +818,15 @@ function bboxFit(data) {
       minLat = Math.min(minLat, coords[1]); maxLat = Math.max(maxLat, coords[1]);
     } else { coords.forEach(visit); }
   }
-  data.features.forEach(f => visit(f.geometry.coordinates));
-  map.fitBounds([[minLat, minLng], [maxLat, maxLng]], { padding: [40, 40] });
+  function fromFc(fc) { fc?.features?.forEach(f => f.geometry && visit(f.geometry.coordinates)); }
+  fromFc(geoData);
+  fromFc(infrastructure);
+  fromFc(etheraLine);
+  fromFc(etheraPoints);
+  fromFc(etheraIntersection);
+  if (minLng !== Infinity) map.fitBounds([[minLat, minLng], [maxLat, maxLng]], { padding: [40, 40] });
 }
-bboxFit(geoData);
+bboxFit();
 
 // ── EVENTS ────────────────────────────────────────────────────────────────────
 document.addEventListener('click', e => {
@@ -688,6 +835,12 @@ document.addEventListener('click', e => {
 
 map.on('move zoom', () => { if (activeId) drawConn(activeId); });
 window.addEventListener('resize', () => { if (activeId) drawConn(activeId); });
+} // end runMap
+
+init().catch(e => {
+  document.getElementById('loading-msg').textContent = 'Error: ' + (e.message || e);
+  console.error(e);
+});
 </script>
 </body>
 </html>
