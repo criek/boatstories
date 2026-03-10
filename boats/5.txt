@@ -1,0 +1,11 @@
+
+Koers / Snelheid	57.6° / 0.0 kn
+Huidige Diepgang	14.2 m
+Navigatiestatus	Moored
+Positie ontvangen	
+3 min ago
+IMO / MMSI	9839193 / 228397600
+Roepnaam	FMNG
+AIS-type	Cargo ship (HAZ-A)
+AIS Vlag	France
+Lengte / Breedte	400 / 62 m
